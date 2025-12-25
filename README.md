@@ -23,6 +23,12 @@ Status panel
 - Refresh every second:
   watch -n 1 bash scripts/status.sh --tail 50
 
+Web dashboard
+- Start local UI server:
+  python3 scripts/monitor_server.py
+- Open in browser:
+  http://127.0.0.1:8787
+
 Project init
 - Default name is project-YYYYMMDD-HHMMSS if no name is provided.
 - If the folder exists, a numeric suffix is added (e.g. my-project-2).

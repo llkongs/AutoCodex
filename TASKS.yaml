@@ -84,3 +84,17 @@ tasks:
       - "README documents status usage"
     verify:
       - "manual: run `bash scripts/status.sh --tail 50`"
+
+  - id: T7
+    title: "Add local web dashboard"
+    status: done
+    priority: medium
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/monitor_server.py serves project state/tasks/logs APIs"
+      - "dashboard/index.html renders state, tasks, and logs"
+      - "README documents how to start the dashboard"
+    verify:
+      - "manual: run `python3 scripts/monitor_server.py` and open browser"

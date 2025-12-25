@@ -25,6 +25,7 @@ that gathers requirements and defines roles.
   scripts/intake_step.sh.
 - R9: Intake gathers user requirements, defines project roles, updates
   ROLES.md and SPEC.md, then sets STATE.json to SPEC_READY.
+- R10: Provide a local web dashboard to view project state, tasks, and logs.
 
 ## Acceptance Criteria
 - AC1: Running `bash scripts/init_project.sh` creates a new folder under
@@ -35,6 +36,8 @@ that gathers requirements and defines roles.
   tripping the template guard.
 - AC4: When STATE.json is INTAKE_READY, running `bash scripts/tick.sh` starts
   intake and ends with STATE.json set to SPEC_READY.
+- AC5: Running `python3 scripts/monitor_server.py` serves a local dashboard
+  showing state, tasks, and log tail for projects.
 
 ## Notes
 - The root repo remains a template and can host multiple projects in projects/.
