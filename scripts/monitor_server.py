@@ -151,10 +151,19 @@ class Handler(BaseHTTPRequestHandler):
                     tail = int(query.get("tail", ["200"])[0])
                     logs = sorted((project / "logs").glob("*.log"), key=os.path.getmtime)
                     if not logs:
-                        self._json({"file": None, "tail": tail, "lines": []})
+                        self._json({"file": None, "tail": tail, "lines": [], "mtime": None, "size": None})
                         return
                     latest = logs[-1]
-                    self._json({"file": latest.name, "tail": tail, "lines": tail_lines(latest, tail)})
+                    stat = latest.stat()
+                    self._json(
+                        {
+                            "file": latest.name,
+                            "tail": tail,
+                            "lines": tail_lines(latest, tail),
+                            "mtime": int(stat.st_mtime),
+                            "size": stat.st_size,
+                        }
+                    )
                     return
                 if len(parts) == 4 and parts[3] == "events":
                     query = parse_qs(url.query)

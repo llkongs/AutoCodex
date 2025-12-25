@@ -403,6 +403,7 @@
       let currentProject = null;
       let timer = null;
       let intakeDirty = false;
+      let lastLogKey = "";
 
       function secondsToHuman(seconds) {
         if (seconds === null || seconds === undefined) return "--";
@@ -456,7 +457,7 @@
         await loadProjects();
       }
 
-      async function refreshAll() {
+      async function refreshAll(forceLogs = false) {
         if (!currentProject) return;
         const [state, tasks, logs, eventsData, intakeData] = await Promise.all([
           fetchJSON(`/api/projects/${currentProject}/state`),
@@ -523,13 +524,17 @@
           intakeAnswers.value = intakeData.answers || "";
         }
 
-        if (logs.lines && logs.lines.length > 0) {
-          logBox.textContent = logs.lines.join("\n");
-          if (followLogs.checked) {
-            logBox.scrollTop = logBox.scrollHeight;
+        const logKey = `${logs.file || "none"}:${logs.mtime || 0}:${logs.size || 0}`;
+        if (forceLogs || logKey !== lastLogKey) {
+          lastLogKey = logKey;
+          if (logs.lines && logs.lines.length > 0) {
+            logBox.textContent = logs.lines.join("\n");
+            if (followLogs.checked) {
+              logBox.scrollTop = logBox.scrollHeight;
+            }
+          } else {
+            logBox.textContent = "No logs.";
           }
-        } else {
-          logBox.textContent = "No logs.";
         }
         updateTimestamp();
       }
@@ -571,7 +576,7 @@
       async function start() {
         await loadProjects();
         if (timer) clearInterval(timer);
-        timer = setInterval(refreshAll, 2000);
+        timer = setInterval(() => refreshAll(false), 2000);
       }
 
       start().catch((err) => {
