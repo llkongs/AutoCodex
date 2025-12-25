@@ -22,6 +22,17 @@ if [ -s "INTAKE_ANSWERS.md" ]; then
 4) If intake is complete, clear INTAKE_QUESTIONS.md and set STATE.json.state to SPEC_READY.
 5) Do not implement product code. Do not set STATE.json to RUNNING.
 6) require_confirmations=${REQUIRE_CONFIRMATIONS}"
+
+  python3 - <<'PY'
+import json
+from pathlib import Path
+
+state_path = Path("STATE.json")
+data = json.loads(state_path.read_text())
+if data.get("state") == "INTAKE_WAITING" and data.get("require_confirmations"):
+    data["require_confirmations"] = False
+    state_path.write_text(json.dumps(data, indent=2))
+PY
 else
   python3 - <<'PY'
 from pathlib import Path

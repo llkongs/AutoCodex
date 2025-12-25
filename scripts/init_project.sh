@@ -57,7 +57,7 @@ data["last_error"] = None
 data["diagnosis_done"] = False
 data["resume_state"] = None
 data["diagnosis"] = None
-data["require_confirmations"] = False
+data["require_confirmations"] = True
 path.write_text(json.dumps(data, indent=2))
 PY
 
