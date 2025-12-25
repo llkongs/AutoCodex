@@ -246,6 +246,19 @@
         white-space: pre-wrap;
       }
 
+      .review-content {
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.5;
+        background: #0d120f;
+        border-radius: 12px;
+        border: 1px solid rgba(42, 52, 47, 0.9);
+        padding: 12px;
+        height: 220px;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+
       .controls {
         display: flex;
         gap: 8px;
@@ -374,6 +387,10 @@
               <h3>Recent Events</h3>
               <div class="tasks" id="eventList"></div>
             </div>
+            <div class="section">
+              <h3>Review Content</h3>
+              <div class="review-content" id="reviewContent">Select a file to preview.</div>
+            </div>
           </div>
           <div class="section">
             <h3>Latest Log Tail</h3>
@@ -405,6 +422,7 @@
       const runBtn = document.getElementById("runBtn");
       const followLogs = document.getElementById("followLogs");
       const reviewList = document.getElementById("reviewList");
+      const reviewContent = document.getElementById("reviewContent");
 
       let currentProject = null;
       let timer = null;
@@ -547,9 +565,16 @@
             const name = document.createElement("div");
             name.className = "name";
             name.textContent = item;
+            name.style.cursor = "pointer";
+            name.onclick = async () => {
+              const data = await fetchJSON(
+                `/api/projects/${currentProject}/file?path=${encodeURIComponent(item)}`
+              );
+              reviewContent.textContent = data.content || "";
+            };
             const status = document.createElement("div");
             status.className = "status";
-            status.textContent = "review";
+            status.textContent = "open";
             row.appendChild(name);
             row.appendChild(status);
             reviewList.appendChild(row);

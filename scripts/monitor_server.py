@@ -22,6 +22,24 @@ def safe_project_path(name):
     return path
 
 
+def safe_review_file(project, relpath):
+    if not relpath or relpath.startswith("/") or relpath.startswith("."):
+        return None
+    if ".." in relpath or "\\" in relpath:
+        return None
+    if not relpath.endswith(".md"):
+        return None
+    allowed = ("notes/", "drafts/", "chapters/")
+    if not any(relpath.startswith(prefix) for prefix in allowed):
+        return None
+    full = (project / relpath).resolve()
+    if not str(full).startswith(str(project.resolve())):
+        return None
+    if not full.exists() or not full.is_file():
+        return None
+    return full
+
+
 def read_json(path):
     try:
         return json.loads(path.read_text())
@@ -194,6 +212,15 @@ class Handler(BaseHTTPRequestHandler):
                     if not review_items:
                         review_items = items
                     self._json({"state": state, "items": review_items})
+                    return
+                if len(parts) == 4 and parts[3] == "file":
+                    query = parse_qs(url.query)
+                    relpath = query.get("path", [""])[0]
+                    file_path = safe_review_file(project, relpath)
+                    if not file_path:
+                        self._json({"error": "invalid path"}, status=400)
+                        return
+                    self._json({"path": relpath, "content": file_path.read_text()})
                     return
 
         self._text("Not found", status=404)
