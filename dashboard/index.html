@@ -387,6 +387,7 @@
 
       let currentProject = null;
       let timer = null;
+      let intakeDirty = false;
 
       function secondsToHuman(seconds) {
         if (seconds === null || seconds === undefined) return "--";
@@ -502,7 +503,8 @@
         });
 
         intakeQuestions.value = intakeData.questions || "";
-        if (!intakeAnswers.dataset.locked) {
+        const isFocused = document.activeElement === intakeAnswers;
+        if (!intakeDirty && !isFocused && intakeData.answers !== undefined) {
           intakeAnswers.value = intakeData.answers || "";
         }
 
@@ -514,13 +516,16 @@
         updateTimestamp();
       }
 
+      intakeAnswers.addEventListener("input", () => {
+        intakeDirty = true;
+      });
+
       saveIntakeBtn.addEventListener("click", async () => {
         if (!currentProject) return;
         await postJSON(`/api/projects/${currentProject}/intake`, {
           answers: intakeAnswers.value || "",
         });
-        intakeAnswers.dataset.locked = "1";
-        setTimeout(() => (intakeAnswers.dataset.locked = ""), 500);
+        intakeDirty = false;
         await refreshAll();
       });
 
