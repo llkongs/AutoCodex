@@ -15,6 +15,7 @@ Quick start
    bash scripts/tick.sh
 4) When INTAKE_WAITING, answer questions (INTAKE_ANSWERS.md or web UI), then:
    bash scripts/tick.sh
+   (Once planning completes, the same tick run will auto-start DEV.)
 5) Split work into TASKS.yaml with DoD and verification commands.
 6) Set STATE.json to SPEC_READY or DEV_READY.
 7) Run a watcher (entr/fswatch) or a timer loop to trigger scripts/tick.sh.
