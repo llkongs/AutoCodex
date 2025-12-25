@@ -359,6 +359,11 @@
           </div>
         </div>
 
+        <div class="section">
+          <h3>Review</h3>
+          <div class="tasks" id="reviewList"></div>
+        </div>
+
         <div class="grid">
           <div class="stack">
             <div class="section">
@@ -399,6 +404,7 @@
       const resumeBtn = document.getElementById("resumeBtn");
       const runBtn = document.getElementById("runBtn");
       const followLogs = document.getElementById("followLogs");
+      const reviewList = document.getElementById("reviewList");
 
       let currentProject = null;
       let timer = null;
@@ -459,12 +465,13 @@
 
       async function refreshAll(forceLogs = false) {
         if (!currentProject) return;
-        const [state, tasks, logs, eventsData, intakeData] = await Promise.all([
+        const [state, tasks, logs, eventsData, intakeData, reviewData] = await Promise.all([
           fetchJSON(`/api/projects/${currentProject}/state`),
           fetchJSON(`/api/projects/${currentProject}/tasks`),
           fetchJSON(`/api/projects/${currentProject}/logs?tail=200`),
           fetchJSON(`/api/projects/${currentProject}/events?tail=50`),
           fetchJSON(`/api/projects/${currentProject}/intake`),
+          fetchJSON(`/api/projects/${currentProject}/review`),
         ]);
 
         const now = Math.floor(Date.now() / 1000);
@@ -530,6 +537,31 @@
         const isFocused = document.activeElement === intakeAnswers;
         if (!intakeDirty && !isFocused && intakeData.answers !== undefined) {
           intakeAnswers.value = intakeData.answers || "";
+        }
+
+        reviewList.innerHTML = "";
+        if (reviewData.state === "REVIEW_READY" && reviewData.items && reviewData.items.length > 0) {
+          reviewData.items.forEach((item) => {
+            const row = document.createElement("div");
+            row.className = "task";
+            const name = document.createElement("div");
+            name.className = "name";
+            name.textContent = item;
+            const status = document.createElement("div");
+            status.className = "status";
+            status.textContent = "review";
+            row.appendChild(name);
+            row.appendChild(status);
+            reviewList.appendChild(row);
+          });
+        } else {
+          const row = document.createElement("div");
+          row.className = "task";
+          const name = document.createElement("div");
+          name.className = "name";
+          name.textContent = "No review pending.";
+          row.appendChild(name);
+          reviewList.appendChild(row);
         }
 
         const logKey = `${logs.file || "none"}:${logs.mtime || 0}:${logs.size || 0}`;

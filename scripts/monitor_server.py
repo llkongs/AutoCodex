@@ -182,6 +182,19 @@ class Handler(BaseHTTPRequestHandler):
                         answers = a_path.read_text()
                     self._json({"questions": questions, "answers": answers})
                     return
+                if len(parts) == 4 and parts[3] == "review":
+                    state = read_json(project / "STATE.json").get("state", "")
+                    review_items = read_json(project / "STATE.json").get("review_items", [])
+                    items = []
+                    for folder in ("notes", "drafts", "chapters"):
+                        base = project / folder
+                        if base.exists() and base.is_dir():
+                            for path in sorted(base.glob("*.md")):
+                                items.append(f"{folder}/{path.name}")
+                    if not review_items:
+                        review_items = items
+                    self._json({"state": state, "items": review_items})
+                    return
 
         self._text("Not found", status=404)
 
