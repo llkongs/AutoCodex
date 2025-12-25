@@ -101,6 +101,17 @@ if [ "$ACTION" = "timeout" ]; then
 fi
 
 LOCKDIR=".agent_lock"
+if [ -d "$LOCKDIR" ]; then
+  current_state="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+  if [ "$current_state" != "RUNNING" ]; then
+    rmdir "$LOCKDIR" 2>/dev/null || true
+  fi
+fi
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
   exit 0
 fi
