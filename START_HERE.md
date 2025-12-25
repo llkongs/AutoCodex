@@ -15,3 +15,4 @@ Rules
 - Always work inside projects/<project-name>.
 - Do not run init_project.sh inside projects/.
 - Do not manually copy this repo; use the init script.
+- The repo root contains TEMPLATE_ROOT, so tick.sh will refuse to run there.

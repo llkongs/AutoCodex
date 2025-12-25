@@ -4,6 +4,11 @@ set -euo pipefail
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$BASE_DIR"
 
+if [ -f "$BASE_DIR/TEMPLATE_ROOT" ]; then
+  echo "[tick] template root marker detected; refusing to run."
+  exit 0
+fi
+
 BASE_NAME="$(basename "$BASE_DIR")"
 if echo "$BASE_NAME" | grep -qi "template"; then
   echo "[tick] template directory detected ($BASE_NAME); refusing to run."

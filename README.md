@@ -27,8 +27,9 @@ Project isolation
 - STATE.json, TASKS.yaml, logs/, and .agent_lock are local to that folder.
 
 Template safety
+- If TEMPLATE_ROOT exists, scripts/tick.sh will refuse to run in the repo root.
 - If the folder name contains \"template\" (case-insensitive), scripts/tick.sh will refuse to run.
-- This prevents accidental runs inside the reusable framework/template folder.
+- These checks prevent accidental runs inside the reusable framework/template folder.
 
 Reliability and timeouts
 - scripts/tick.sh updates STATE.json timestamps on every run.
