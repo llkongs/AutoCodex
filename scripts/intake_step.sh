@@ -4,13 +4,24 @@ set -euo pipefail
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$BASE_DIR"
 
+REQUIRE_CONFIRMATIONS="$(python3 - <<'PY'
+import json
+from pathlib import Path
+data = json.loads(Path('STATE.json').read_text())
+print(str(bool(data.get('require_confirmations', False))).lower())
+PY
+)"
+
 if [ -s "INTAKE_ANSWERS.md" ]; then
   codex exec --full-auto "You are the intake coordinator. Read INTAKE_ANSWERS.md, ROLES.md, SPEC.md, TASKS.yaml, and STATE.json.
 1) Use the answers to define required roles and prompts in ROLES.md.
 2) Update SPEC.md with clear goals, requirements, and acceptance criteria.
-3) If any confirmation is still missing, write ONLY the remaining questions to INTAKE_QUESTIONS.md, clear INTAKE_ANSWERS.md to a blank template, and set STATE.json.state to INTAKE_WAITING.
+3) If any confirmation is still missing:
+   - If require_confirmations is true, write ONLY the remaining questions to INTAKE_QUESTIONS.md, clear INTAKE_ANSWERS.md to a blank template, and set STATE.json.state to INTAKE_WAITING.
+   - If require_confirmations is false, proceed with reasonable assumptions, note them in SPEC.md/ROLES.md, clear INTAKE_QUESTIONS.md, and set STATE.json.state to SPEC_READY.
 4) If intake is complete, clear INTAKE_QUESTIONS.md and set STATE.json.state to SPEC_READY.
-5) Do not implement product code. Do not set STATE.json to RUNNING."
+5) Do not implement product code. Do not set STATE.json to RUNNING.
+6) require_confirmations=${REQUIRE_CONFIRMATIONS}"
 else
   python3 - <<'PY'
 from pathlib import Path

@@ -10,6 +10,7 @@
   "timeout_sec": 1800,
   "diagnosis_done": false,
   "resume_state": null,
+  "require_confirmations": false,
   "last_error": null,
   "diagnosis": null
 }
