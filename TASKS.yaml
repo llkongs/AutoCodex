@@ -1,0 +1,57 @@
+version: 1
+project: "AI Auto Task Frame"
+
+tasks:
+  - id: T1
+    title: "Implement init script for project creation"
+    status: done  # todo | in_progress | done | blocked
+    priority: high
+    size: M  # S | M | L
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/init_project.sh creates projects/ if needed"
+      - "Name generation, collision handling, and template-name checks work"
+      - "Required framework files and scripts/ are copied into the new project"
+      - "logs/ is created in the new project"
+    verify:
+      - "manual: run `bash scripts/init_project.sh` and check output"
+
+  - id: T2
+    title: "Document the init workflow in README"
+    status: done
+    priority: high
+    size: S
+    max_duration_min: 20
+    blocked_by: ["T1"]
+    dod:
+      - "README describes how to create a new project folder and run tick.sh"
+    verify:
+      - "manual"
+
+  - id: T3
+    title: "Add repo-root guidance and projects/ placeholder"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 15
+    blocked_by: []
+    dod:
+      - "AGENTS.md mentions initializing a project under projects/"
+      - "projects/ exists with a placeholder file"
+    verify:
+      - "manual"
+
+  - id: T4
+    title: "Add roles template and init integration"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "ROLES.md exists with a clear template"
+      - "init_project.sh copies ROLES.md and START_HERE.md into projects"
+      - "Docs mention defining roles first"
+    verify:
+      - "manual"

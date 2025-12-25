@@ -1,0 +1,5 @@
+.DS_Store
+logs/
+.agent_lock
+projects/*
+!projects/.gitkeep

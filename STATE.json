@@ -1,0 +1,15 @@
+{
+  "state": "REVIEW_READY",
+  "next": "DEV",
+  "lock": null,
+  "run_id": null,
+  "role": null,
+  "started_at": null,
+  "updated_at": null,
+  "heartbeat_at": null,
+  "timeout_sec": 1800,
+  "diagnosis_done": false,
+  "resume_state": null,
+  "last_error": null,
+  "diagnosis": null
+}
