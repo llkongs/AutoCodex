@@ -247,7 +247,7 @@ PY
     set -e
     append_event
     ;;
-  RUNNING|REVIEW_READY|DONE|ERROR)
+  RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING)
     echo "[tick] no action for state=$state" | tee -a "$LOG_FILE"
     ;;
   *)

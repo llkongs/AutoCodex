@@ -18,5 +18,5 @@ Roles
 - DEV role: implement tasks, run verification, update task status and state.
 
 State flow
-INTAKE_READY -> SPEC_READY -> DEV_READY -> REVIEW_READY or SPEC_READY
+INTAKE_READY -> INTAKE_WAITING -> SPEC_READY -> DEV_READY -> REVIEW_READY or SPEC_READY
 DONE ends the loop. ERROR requires manual intervention.

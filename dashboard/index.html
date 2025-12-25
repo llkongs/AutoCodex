@@ -179,6 +179,31 @@
         color: var(--muted);
       }
 
+      .intake-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .intake-box textarea {
+        width: 100%;
+        min-height: 140px;
+        background: #0d120f;
+        color: var(--ink);
+        border: 1px solid rgba(42, 52, 47, 0.9);
+        border-radius: 10px;
+        padding: 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .intake-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
       .tasks {
         display: flex;
         flex-direction: column;
@@ -255,6 +280,9 @@
         .grid {
           grid-template-columns: 1fr;
         }
+        .intake-box {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -305,6 +333,19 @@
           <div class="badge" id="diagnosisBadge">Diagnosis: --</div>
         </div>
 
+        <div class="section">
+          <h3>Intake</h3>
+          <div class="intake-box">
+            <textarea id="intakeQuestions" readonly placeholder="Questions will appear here."></textarea>
+            <textarea id="intakeAnswers" placeholder="Write your answers here."></textarea>
+          </div>
+          <div class="intake-actions">
+            <button class="btn" id="saveIntakeBtn">Save Answers</button>
+            <button class="btn alt" id="resumeBtn">Resume Intake</button>
+            <button class="btn alt" id="pauseBtn">Pause Project</button>
+          </div>
+        </div>
+
         <div class="grid">
           <div class="stack">
             <div class="section">
@@ -338,6 +379,11 @@
       const lastUpdated = document.getElementById("lastUpdated");
       const refreshBtn = document.getElementById("refreshBtn");
       const successValue = document.getElementById("successValue");
+      const intakeQuestions = document.getElementById("intakeQuestions");
+      const intakeAnswers = document.getElementById("intakeAnswers");
+      const saveIntakeBtn = document.getElementById("saveIntakeBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const resumeBtn = document.getElementById("resumeBtn");
 
       let currentProject = null;
       let timer = null;
@@ -359,6 +405,16 @@
 
       async function fetchJSON(path) {
         const res = await fetch(path);
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        return res.json();
+      }
+
+      async function postJSON(path, payload) {
+        const res = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload || {}),
+        });
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         return res.json();
       }
@@ -386,11 +442,12 @@
 
       async function refreshAll() {
         if (!currentProject) return;
-        const [state, tasks, logs, eventsData] = await Promise.all([
+        const [state, tasks, logs, eventsData, intakeData] = await Promise.all([
           fetchJSON(`/api/projects/${currentProject}/state`),
           fetchJSON(`/api/projects/${currentProject}/tasks`),
           fetchJSON(`/api/projects/${currentProject}/logs?tail=200`),
           fetchJSON(`/api/projects/${currentProject}/events?tail=50`),
+          fetchJSON(`/api/projects/${currentProject}/intake`),
         ]);
 
         const now = Math.floor(Date.now() / 1000);
@@ -444,6 +501,11 @@
           eventList.appendChild(row);
         });
 
+        intakeQuestions.value = intakeData.questions || "";
+        if (!intakeAnswers.dataset.locked) {
+          intakeAnswers.value = intakeData.answers || "";
+        }
+
         if (logs.lines && logs.lines.length > 0) {
           logBox.textContent = logs.lines.join("\n");
         } else {
@@ -451,6 +513,28 @@
         }
         updateTimestamp();
       }
+
+      saveIntakeBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/intake`, {
+          answers: intakeAnswers.value || "",
+        });
+        intakeAnswers.dataset.locked = "1";
+        setTimeout(() => (intakeAnswers.dataset.locked = ""), 500);
+        await refreshAll();
+      });
+
+      pauseBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/pause`, {});
+        await refreshAll();
+      });
+
+      resumeBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/resume`, {});
+        await refreshAll();
+      });
 
       refreshBtn.addEventListener("click", refreshAll);
 

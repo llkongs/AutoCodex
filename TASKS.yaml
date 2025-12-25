@@ -112,3 +112,17 @@ tasks:
       - "Dashboard displays recent events and success rate"
     verify:
       - "manual: run `bash scripts/tick.sh` and inspect logs/events.ndjson"
+
+  - id: T9
+    title: "Add intake waiting and pause controls in UI"
+    status: done
+    priority: medium
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "INTAKE_QUESTIONS.md and INTAKE_ANSWERS.md are used in intake flow"
+      - "Dashboard shows intake questions and accepts answers"
+      - "Dashboard can pause/resume projects"
+    verify:
+      - "manual: answer intake via UI and resume"

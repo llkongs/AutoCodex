@@ -38,6 +38,12 @@ def tail_lines(path, count):
     return lines[-count:]
 
 
+def write_state(path, updates):
+    data = read_json(path) if path.exists() else {}
+    data.update(updates)
+    path.write_text(json.dumps(data, indent=2))
+
+
 def read_events(path, count):
     if not path.exists():
         return []
@@ -154,6 +160,91 @@ class Handler(BaseHTTPRequestHandler):
                     tail = int(query.get("tail", ["50"])[0])
                     events = read_events(project / "logs" / "events.ndjson", tail)
                     self._json({"tail": tail, "events": events})
+                    return
+                if len(parts) == 4 and parts[3] == "intake":
+                    questions = ""
+                    answers = ""
+                    q_path = project / "INTAKE_QUESTIONS.md"
+                    a_path = project / "INTAKE_ANSWERS.md"
+                    if q_path.exists():
+                        questions = q_path.read_text()
+                    if a_path.exists():
+                        answers = a_path.read_text()
+                    self._json({"questions": questions, "answers": answers})
+                    return
+
+        self._text("Not found", status=404)
+
+    def do_POST(self):
+        url = urlparse(self.path)
+        path = url.path
+        length = int(self.headers.get("Content-Length", "0") or 0)
+        body = self.rfile.read(length) if length else b""
+        try:
+            payload = json.loads(body.decode("utf-8")) if body else {}
+        except Exception:
+            payload = {}
+
+        if path.startswith("/api/projects"):
+            parts = path.strip("/").split("/")
+            if len(parts) >= 3:
+                name = parts[2]
+                project = safe_project_path(name)
+                if not project:
+                    self._json({"error": "project not found"}, status=404)
+                    return
+
+                if len(parts) == 4 and parts[3] == "pause":
+                    state_path = project / "STATE.json"
+                    now = int(__import__("time").time())
+                    write_state(
+                        state_path,
+                        {
+                            "state": "PAUSED",
+                            "role": None,
+                            "run_id": None,
+                            "started_at": None,
+                            "updated_at": now,
+                            "heartbeat_at": now,
+                        },
+                    )
+                    self._json({"ok": True})
+                    return
+
+                if len(parts) == 4 and parts[3] == "resume":
+                    state_path = project / "STATE.json"
+                    now = int(__import__("time").time())
+                    write_state(
+                        state_path,
+                        {
+                            "state": "INTAKE_READY",
+                            "role": None,
+                            "run_id": None,
+                            "started_at": None,
+                            "updated_at": now,
+                            "heartbeat_at": now,
+                        },
+                    )
+                    self._json({"ok": True})
+                    return
+
+                if len(parts) == 4 and parts[3] == "intake":
+                    answers = payload.get("answers", "")
+                    (project / "INTAKE_ANSWERS.md").write_text(answers)
+                    state_path = project / "STATE.json"
+                    now = int(__import__("time").time())
+                    write_state(
+                        state_path,
+                        {
+                            "state": "INTAKE_READY",
+                            "role": None,
+                            "run_id": None,
+                            "started_at": None,
+                            "updated_at": now,
+                            "heartbeat_at": now,
+                        },
+                    )
+                    self._json({"ok": True})
                     return
 
         self._text("Not found", status=404)

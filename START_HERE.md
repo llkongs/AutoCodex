@@ -8,9 +8,12 @@ If you only read one file, read this.
    cd projects/my-project
 3) Run intake and answer questions:
    bash scripts/tick.sh
-4) Review ROLES.md and SPEC.md, then adjust if needed.
-5) Set STATE.json to SPEC_READY or DEV_READY.
-6) Run the worker loop:
+4) When INTAKE_WAITING, answer in INTAKE_ANSWERS.md or the web dashboard.
+5) Run intake again to process answers:
+   bash scripts/tick.sh
+6) Review ROLES.md and SPEC.md, then adjust if needed.
+7) Set STATE.json to SPEC_READY or DEV_READY.
+8) Run the worker loop:
    bash scripts/tick.sh
 
 Rules
