@@ -42,4 +42,22 @@ done
 cp -R "$BASE_DIR/scripts" "$target/"
 mkdir -p "$target/logs"
 
+python3 - <<PY
+import json
+from pathlib import Path
+path = Path("$target/STATE.json")
+data = json.loads(path.read_text())
+data["state"] = "INTAKE_READY"
+data["role"] = None
+data["run_id"] = None
+data["started_at"] = None
+data["updated_at"] = None
+data["heartbeat_at"] = None
+data["last_error"] = None
+data["diagnosis_done"] = False
+data["resume_state"] = None
+data["diagnosis"] = None
+path.write_text(json.dumps(data, indent=2))
+PY
+
 echo "$target"

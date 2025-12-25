@@ -2,7 +2,8 @@
 
 ## Goal
 Provide an initialization workflow so users can clone this framework repo and
-create isolated project folders without manual copying.
+create isolated project folders without manual copying, with an intake step
+that gathers requirements and defines roles.
 
 ## Non-goals
 - Building any project-specific features or tasks beyond the framework.
@@ -20,6 +21,10 @@ create isolated project folders without manual copying.
 - R6: Refuse project names that contain "template" (case-insensitive) and
   print a clear message.
 - R7: Print the created project path on success; exit non-zero on error.
+- R8: Add an intake stage with a new state INTAKE_READY and script
+  scripts/intake_step.sh.
+- R9: Intake gathers user requirements, defines project roles, updates
+  ROLES.md and SPEC.md, then sets STATE.json to SPEC_READY.
 
 ## Acceptance Criteria
 - AC1: Running `bash scripts/init_project.sh` creates a new folder under
@@ -28,6 +33,8 @@ create isolated project folders without manual copying.
   or projects/myproj-2 if it already exists.
 - AC3: The created project folder can run `bash scripts/tick.sh` without
   tripping the template guard.
+- AC4: When STATE.json is INTAKE_READY, running `bash scripts/tick.sh` starts
+  intake and ends with STATE.json set to SPEC_READY.
 
 ## Notes
 - The root repo remains a template and can host multiple projects in projects/.

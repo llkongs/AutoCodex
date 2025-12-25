@@ -55,3 +55,18 @@ tasks:
       - "Docs mention defining roles first"
     verify:
       - "manual"
+
+  - id: T5
+    title: "Add intake stage to collect requirements and roles"
+    status: done
+    priority: high
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/intake_step.sh exists and prompts for requirements"
+      - "tick.sh handles INTAKE_READY and routes to intake_step.sh"
+      - "STATE.json defaults to INTAKE_READY in the template"
+      - "Docs mention the intake step"
+    verify:
+      - "manual: run `bash scripts/tick.sh` from a new project and answer prompts"

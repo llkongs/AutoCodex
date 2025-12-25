@@ -6,9 +6,11 @@ If you only read one file, read this.
    bash scripts/init_project.sh my-project
 2) Enter the new project folder:
    cd projects/my-project
-3) Define roles in ROLES.md first.
-4) Fill SPEC.md and TASKS.yaml, set STATE.json to SPEC_READY or DEV_READY.
-5) Run the worker loop:
+3) Run intake and answer questions:
+   bash scripts/tick.sh
+4) Review ROLES.md and SPEC.md, then adjust if needed.
+5) Set STATE.json to SPEC_READY or DEV_READY.
+6) Run the worker loop:
    bash scripts/tick.sh
 
 Rules

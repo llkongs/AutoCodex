@@ -9,10 +9,13 @@ Start here
 Quick start
 1) Create a new project folder under projects/:
    bash scripts/init_project.sh my-project
-2) Enter the new folder and fill SPEC.md with requirements and acceptance criteria.
-3) Split work into TASKS.yaml with DoD and verification commands.
-4) Set STATE.json to SPEC_READY or DEV_READY.
-5) Run a watcher (entr/fswatch) or a timer loop to trigger scripts/tick.sh.
+2) Enter the new folder:
+   cd projects/my-project
+3) Run intake and answer questions:
+   bash scripts/tick.sh
+4) Split work into TASKS.yaml with DoD and verification commands.
+5) Set STATE.json to SPEC_READY or DEV_READY.
+6) Run a watcher (entr/fswatch) or a timer loop to trigger scripts/tick.sh.
 
 Project init
 - Default name is project-YYYYMMDD-HHMMSS if no name is provided.
@@ -21,6 +24,7 @@ Project init
 - Run init_project.sh only from the repo root (not inside projects/).
 - Do not manually copy the repo; always initialize via the script.
 - ROLES.md is copied into each project to define required roles first.
+- New projects start at INTAKE_READY to gather requirements and roles.
 
 Project isolation
 - Each project lives under projects/ in its own folder.

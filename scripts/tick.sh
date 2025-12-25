@@ -48,12 +48,17 @@ if data.get('state') == 'RUNNING':
             data['last_error'] = 'timeout_after_diagnosis'
         else:
             data['state'] = 'DIAGNOSE_READY'
-            data['resume_state'] = 'SPEC_READY' if role == 'PO' else 'DEV_READY'
+            if role == 'PO':
+                data['resume_state'] = 'SPEC_READY'
+            elif role == 'INTAKE':
+                data['resume_state'] = 'INTAKE_READY'
+            else:
+                data['resume_state'] = 'DEV_READY'
         path.write_text(json.dumps(data, indent=2))
         print('timeout')
         raise SystemExit
 
-if data.get('state') in ('SPEC_READY', 'DEV_READY'):
+if data.get('state') in ('INTAKE_READY', 'SPEC_READY', 'DEV_READY'):
     action = data['state']
     if data.get('last_error') is None:
         data['diagnosis_done'] = False
@@ -90,6 +95,25 @@ PY
 echo "[tick] state=$state run_id=$RUN_ID" | tee -a "$LOG_FILE"
 
 case "$state" in
+  INTAKE_READY)
+    python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'RUNNING'
+data['role'] = 'INTAKE'
+data['run_id'] = __import__('os').environ.get('RUN_ID', '')
+data['started_at'] = now
+data['updated_at'] = now
+data['heartbeat_at'] = now
+data['last_error'] = None
+path.write_text(json.dumps(data, indent=2))
+PY
+    bash scripts/intake_step.sh 2>&1 | tee -a "$LOG_FILE"
+    ;;
   SPEC_READY)
     python3 - <<'PY'
 import json, time
