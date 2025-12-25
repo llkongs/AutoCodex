@@ -247,12 +247,49 @@ data['heartbeat_at'] = now
 data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
-    set +e
-    bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE"
-    EXIT_CODE=${PIPESTATUS[0]}
-    export EXIT_CODE
-    set -e
-    append_event
+    max_chain="${DEV_CHAIN_LIMIT:-3}"
+    chain_count=0
+    while true; do
+      set +e
+      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE"
+      EXIT_CODE=${PIPESTATUS[0]}
+      export EXIT_CODE
+      set -e
+      append_event
+
+      next_state="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+      if [ "$next_state" != "DEV_READY" ]; then
+        break
+      fi
+      chain_count=$((chain_count + 1))
+      if [ "$chain_count" -ge "$max_chain" ]; then
+        break
+      fi
+      STATE_BEFORE="DEV_READY"
+      ROLE_NAME="DEV"
+      export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
+      python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'RUNNING'
+data['role'] = 'DEV'
+data['run_id'] = __import__('os').environ.get('RUN_ID', '')
+data['started_at'] = now
+data['updated_at'] = now
+data['heartbeat_at'] = now
+data['last_error'] = None
+path.write_text(json.dumps(data, indent=2))
+PY
+    done
     ;;
   DIAGNOSE_READY)
     STATE_BEFORE="$state"
