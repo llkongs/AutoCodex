@@ -8,8 +8,8 @@ if [ -s "INTAKE_ANSWERS.md" ]; then
   codex exec --full-auto "You are the intake coordinator. Read INTAKE_ANSWERS.md, ROLES.md, SPEC.md, TASKS.yaml, and STATE.json.
 1) Use the answers to define required roles and prompts in ROLES.md.
 2) Update SPEC.md with clear goals, requirements, and acceptance criteria.
-3) If answers are incomplete, write follow-up questions to INTAKE_QUESTIONS.md and set STATE.json.state to INTAKE_WAITING.
-4) If intake is complete, set STATE.json.state to SPEC_READY.
+3) If any confirmation is still missing, write ONLY the remaining questions to INTAKE_QUESTIONS.md, clear INTAKE_ANSWERS.md to a blank template, and set STATE.json.state to INTAKE_WAITING.
+4) If intake is complete, clear INTAKE_QUESTIONS.md and set STATE.json.state to SPEC_READY.
 5) Do not implement product code. Do not set STATE.json to RUNNING."
 else
   python3 - <<'PY'
