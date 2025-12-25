@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -243,6 +244,15 @@ class Handler(BaseHTTPRequestHandler):
                             "updated_at": now,
                             "heartbeat_at": now,
                         },
+                    )
+                    self._json({"ok": True})
+                    return
+                if len(parts) == 4 and parts[3] == "run":
+                    subprocess.Popen(
+                        ["bash", "scripts/tick.sh"],
+                        cwd=str(project),
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
                     )
                     self._json({"ok": True})
                     return

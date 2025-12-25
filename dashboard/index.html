@@ -270,6 +270,14 @@
         border: 1px solid var(--border);
       }
 
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
       @media (max-width: 900px) {
         .shell {
           grid-template-columns: 1fr;
@@ -294,6 +302,10 @@
       </div>
       <div class="controls">
         <span id="lastUpdated">Last update: --</span>
+        <label class="toggle">
+          <input type="checkbox" id="followLogs" checked />
+          Follow logs
+        </label>
         <button class="btn alt" id="refreshBtn">Refresh</button>
       </div>
     </header>
@@ -343,6 +355,7 @@
             <button class="btn" id="saveIntakeBtn">Save Answers</button>
             <button class="btn alt" id="resumeBtn">Resume Intake</button>
             <button class="btn alt" id="pauseBtn">Pause Project</button>
+            <button class="btn alt" id="runBtn">Run Tick</button>
           </div>
         </div>
 
@@ -384,6 +397,8 @@
       const saveIntakeBtn = document.getElementById("saveIntakeBtn");
       const pauseBtn = document.getElementById("pauseBtn");
       const resumeBtn = document.getElementById("resumeBtn");
+      const runBtn = document.getElementById("runBtn");
+      const followLogs = document.getElementById("followLogs");
 
       let currentProject = null;
       let timer = null;
@@ -510,6 +525,9 @@
 
         if (logs.lines && logs.lines.length > 0) {
           logBox.textContent = logs.lines.join("\n");
+          if (followLogs.checked) {
+            logBox.scrollTop = logBox.scrollHeight;
+          }
         } else {
           logBox.textContent = "No logs.";
         }
@@ -538,6 +556,13 @@
       resumeBtn.addEventListener("click", async () => {
         if (!currentProject) return;
         await postJSON(`/api/projects/${currentProject}/resume`, {});
+        await postJSON(`/api/projects/${currentProject}/run`, {});
+        await refreshAll();
+      });
+
+      runBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/run`, {});
         await refreshAll();
       });
 
