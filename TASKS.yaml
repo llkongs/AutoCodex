@@ -70,3 +70,17 @@ tasks:
       - "Docs mention the intake step"
     verify:
       - "manual: run `bash scripts/tick.sh` from a new project and answer prompts"
+
+  - id: T6
+    title: "Add CLI status panel"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "scripts/status.sh shows state, role, runtime, heartbeat, task progress, and log tail"
+      - "Supports --tail and --lang options"
+      - "README documents status usage"
+    verify:
+      - "manual: run `bash scripts/status.sh --tail 50`"

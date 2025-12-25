@@ -17,6 +17,12 @@ Quick start
 5) Set STATE.json to SPEC_READY or DEV_READY.
 6) Run a watcher (entr/fswatch) or a timer loop to trigger scripts/tick.sh.
 
+Status panel
+- Watch current progress:
+  bash scripts/status.sh --tail 50
+- Refresh every second:
+  watch -n 1 bash scripts/status.sh --tail 50
+
 Project init
 - Default name is project-YYYYMMDD-HHMMSS if no name is provided.
 - If the folder exists, a numeric suffix is added (e.g. my-project-2).
