@@ -98,3 +98,17 @@ tasks:
       - "README documents how to start the dashboard"
     verify:
       - "manual: run `python3 scripts/monitor_server.py` and open browser"
+
+  - id: T8
+    title: "Add events log for monitoring metrics"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "logs/events.ndjson is appended on each tick run"
+      - "Event includes role, state_before, state_after, and exit_code"
+      - "Dashboard displays recent events and success rate"
+    verify:
+      - "manual: run `bash scripts/tick.sh` and inspect logs/events.ndjson"

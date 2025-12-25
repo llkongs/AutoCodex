@@ -94,8 +94,56 @@ PY
 
 echo "[tick] state=$state run_id=$RUN_ID" | tee -a "$LOG_FILE"
 
+append_event() {
+  python3 - <<'PY'
+import json, time
+from pathlib import Path
+import os, re
+
+state_path = Path('STATE.json')
+tasks_path = Path('TASKS.yaml')
+log_file = os.environ.get('LOG_FILE', '')
+run_id = os.environ.get('RUN_ID', '')
+state_before = os.environ.get('STATE_BEFORE', '')
+role = os.environ.get('ROLE_NAME', '')
+exit_code = int(os.environ.get('EXIT_CODE', '0') or 0)
+
+data = json.loads(state_path.read_text()) if state_path.exists() else {}
+state_after = data.get('state', '')
+
+done = 0
+total = 0
+if tasks_path.exists():
+  for line in tasks_path.read_text().splitlines():
+    if re.match(r"^\s*status:\s*", line):
+      total += 1
+      if re.match(r"^\s*status:\s*done\b", line):
+        done += 1
+
+event = {
+  "ts": int(time.time()),
+  "run_id": run_id,
+  "role": role,
+  "state_before": state_before,
+  "state_after": state_after,
+  "exit_code": exit_code,
+  "tasks_done": done,
+  "tasks_total": total,
+  "log_file": Path(log_file).name if log_file else None,
+}
+
+events_path = Path('logs') / 'events.ndjson'
+events_path.parent.mkdir(parents=True, exist_ok=True)
+with events_path.open('a', encoding='utf-8') as f:
+  f.write(json.dumps(event, ensure_ascii=False) + "\n")
+PY
+}
+
 case "$state" in
   INTAKE_READY)
+    STATE_BEFORE="$state"
+    ROLE_NAME="INTAKE"
+    export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
     python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -112,9 +160,17 @@ data['heartbeat_at'] = now
 data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
+    set +e
     bash scripts/intake_step.sh 2>&1 | tee -a "$LOG_FILE"
+    EXIT_CODE=${PIPESTATUS[0]}
+    export EXIT_CODE
+    set -e
+    append_event
     ;;
   SPEC_READY)
+    STATE_BEFORE="$state"
+    ROLE_NAME="PO"
+    export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
     python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -131,9 +187,17 @@ data['heartbeat_at'] = now
 data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
+    set +e
     bash scripts/po_step.sh 2>&1 | tee -a "$LOG_FILE"
+    EXIT_CODE=${PIPESTATUS[0]}
+    export EXIT_CODE
+    set -e
+    append_event
     ;;
   DEV_READY)
+    STATE_BEFORE="$state"
+    ROLE_NAME="DEV"
+    export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
     python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -150,9 +214,17 @@ data['heartbeat_at'] = now
 data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
+    set +e
     bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE"
+    EXIT_CODE=${PIPESTATUS[0]}
+    export EXIT_CODE
+    set -e
+    append_event
     ;;
   DIAGNOSE_READY)
+    STATE_BEFORE="$state"
+    ROLE_NAME="DIAGNOSE"
+    export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
     python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -168,7 +240,12 @@ data['updated_at'] = now
 data['heartbeat_at'] = now
 path.write_text(json.dumps(data, indent=2))
 PY
+    set +e
     bash scripts/diagnose_step.sh 2>&1 | tee -a "$LOG_FILE"
+    EXIT_CODE=${PIPESTATUS[0]}
+    export EXIT_CODE
+    set -e
+    append_event
     ;;
   RUNNING|REVIEW_READY|DONE|ERROR)
     echo "[tick] no action for state=$state" | tee -a "$LOG_FILE"

@@ -117,7 +117,7 @@
 
       .cards {
         display: grid;
-        grid-template-columns: repeat(4, minmax(140px, 1fr));
+        grid-template-columns: repeat(5, minmax(140px, 1fr));
         gap: 12px;
       }
 
@@ -154,7 +154,13 @@
 
       .grid {
         display: grid;
-        grid-template-columns: 1.2fr 1fr;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 16px;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
         gap: 16px;
       }
 
@@ -288,6 +294,10 @@
             <h4>Heartbeat Age</h4>
             <div class="value" id="heartbeatValue">--</div>
           </div>
+          <div class="card">
+            <h4>Success Rate</h4>
+            <div class="value" id="successValue">--</div>
+          </div>
         </div>
 
         <div class="section">
@@ -296,9 +306,15 @@
         </div>
 
         <div class="grid">
-          <div class="section">
-            <h3>Task List</h3>
-            <div class="tasks" id="taskList"></div>
+          <div class="stack">
+            <div class="section">
+              <h3>Task List</h3>
+              <div class="tasks" id="taskList"></div>
+            </div>
+            <div class="section">
+              <h3>Recent Events</h3>
+              <div class="tasks" id="eventList"></div>
+            </div>
           </div>
           <div class="section">
             <h3>Latest Log Tail</h3>
@@ -317,9 +333,11 @@
       const taskBadge = document.getElementById("taskBadge");
       const diagnosisBadge = document.getElementById("diagnosisBadge");
       const taskList = document.getElementById("taskList");
+      const eventList = document.getElementById("eventList");
       const logBox = document.getElementById("logBox");
       const lastUpdated = document.getElementById("lastUpdated");
       const refreshBtn = document.getElementById("refreshBtn");
+      const successValue = document.getElementById("successValue");
 
       let currentProject = null;
       let timer = null;
@@ -368,10 +386,11 @@
 
       async function refreshAll() {
         if (!currentProject) return;
-        const [state, tasks, logs] = await Promise.all([
+        const [state, tasks, logs, eventsData] = await Promise.all([
           fetchJSON(`/api/projects/${currentProject}/state`),
           fetchJSON(`/api/projects/${currentProject}/tasks`),
           fetchJSON(`/api/projects/${currentProject}/logs?tail=200`),
+          fetchJSON(`/api/projects/${currentProject}/events?tail=50`),
         ]);
 
         const now = Math.floor(Date.now() / 1000);
@@ -398,6 +417,31 @@
           row.appendChild(name);
           row.appendChild(status);
           taskList.appendChild(row);
+        });
+
+        const events = eventsData.events || [];
+        if (events.length > 0) {
+          const successes = events.filter((e) => e.exit_code === 0).length;
+          const rate = Math.round((successes / events.length) * 100);
+          successValue.textContent = `${rate}%`;
+        } else {
+          successValue.textContent = "--";
+        }
+
+        eventList.innerHTML = "";
+        events.slice().reverse().forEach((evt) => {
+          const row = document.createElement("div");
+          row.className = "task";
+          const name = document.createElement("div");
+          name.className = "name";
+          const ts = evt.ts ? new Date(evt.ts * 1000).toLocaleTimeString() : "--";
+          name.textContent = `${ts} ${evt.role || ""} ${evt.state_before || ""} -> ${evt.state_after || ""}`;
+          const status = document.createElement("div");
+          status.className = "status";
+          status.textContent = evt.exit_code === 0 ? "ok" : `exit ${evt.exit_code}`;
+          row.appendChild(name);
+          row.appendChild(status);
+          eventList.appendChild(row);
         });
 
         if (logs.lines && logs.lines.length > 0) {

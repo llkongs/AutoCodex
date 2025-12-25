@@ -26,6 +26,7 @@ that gathers requirements and defines roles.
 - R9: Intake gathers user requirements, defines project roles, updates
   ROLES.md and SPEC.md, then sets STATE.json to SPEC_READY.
 - R10: Provide a local web dashboard to view project state, tasks, and logs.
+- R11: Record each tick run to logs/events.ndjson for monitoring metrics.
 
 ## Acceptance Criteria
 - AC1: Running `bash scripts/init_project.sh` creates a new folder under
@@ -38,6 +39,8 @@ that gathers requirements and defines roles.
   intake and ends with STATE.json set to SPEC_READY.
 - AC5: Running `python3 scripts/monitor_server.py` serves a local dashboard
   showing state, tasks, and log tail for projects.
+- AC6: Each tick run appends a JSON line to logs/events.ndjson with role,
+  state transitions, and exit code.
 
 ## Notes
 - The root repo remains a template and can host multiple projects in projects/.

@@ -38,6 +38,19 @@ def tail_lines(path, count):
     return lines[-count:]
 
 
+def read_events(path, count):
+    if not path.exists():
+        return []
+    lines = tail_lines(path, count)
+    events = []
+    for line in lines:
+        try:
+            events.append(json.loads(line))
+        except Exception:
+            continue
+    return events
+
+
 def parse_tasks(path):
     if not path.exists():
         return {"total": 0, "done": 0, "items": []}
@@ -135,6 +148,12 @@ class Handler(BaseHTTPRequestHandler):
                         return
                     latest = logs[-1]
                     self._json({"file": latest.name, "tail": tail, "lines": tail_lines(latest, tail)})
+                    return
+                if len(parts) == 4 and parts[3] == "events":
+                    query = parse_qs(url.query)
+                    tail = int(query.get("tail", ["50"])[0])
+                    events = read_events(project / "logs" / "events.ndjson", tail)
+                    self._json({"tail": tail, "events": events})
                     return
 
         self._text("Not found", status=404)
