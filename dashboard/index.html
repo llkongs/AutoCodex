@@ -518,7 +518,15 @@
           eventList.appendChild(row);
         });
 
-        intakeQuestions.value = intakeData.questions || "";
+        const rawQuestions = intakeData.questions || "";
+        let fallbackQuestions = "";
+        if (!rawQuestions && intakeData.answers) {
+          const parts = intakeData.answers.split("# Open Questions");
+          if (parts.length > 1) {
+            fallbackQuestions = "# Open Questions" + parts[1];
+          }
+        }
+        intakeQuestions.value = rawQuestions || fallbackQuestions || "";
         const isFocused = document.activeElement === intakeAnswers;
         if (!intakeDirty && !isFocused && intakeData.answers !== undefined) {
           intakeAnswers.value = intakeData.answers || "";
