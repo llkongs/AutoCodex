@@ -21,6 +21,27 @@ LOG_DIR="$BASE_DIR/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/tick-$RUN_ID.log"
 
+start_heartbeat() {
+  local pid="$1"
+  (
+    while kill -0 "$pid" 2>/dev/null; do
+      python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['heartbeat_at'] = now
+data['updated_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+      sleep 30
+    done
+  ) &
+  echo $!
+}
+
 ACTION="$(python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -161,10 +182,14 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/intake_step.sh 2>&1 | tee -a "$LOG_FILE"
+    bash scripts/intake_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    run_pid=$!
+    hb_pid=$(start_heartbeat "$run_pid")
+    wait "$run_pid"
     EXIT_CODE=${PIPESTATUS[0]}
     export EXIT_CODE
     set -e
+    kill "$hb_pid" 2>/dev/null || true
     append_event
     ;;
   SPEC_READY)
@@ -188,10 +213,14 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/po_step.sh 2>&1 | tee -a "$LOG_FILE"
+    bash scripts/po_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    run_pid=$!
+    hb_pid=$(start_heartbeat "$run_pid")
+    wait "$run_pid"
     EXIT_CODE=${PIPESTATUS[0]}
     export EXIT_CODE
     set -e
+    kill "$hb_pid" 2>/dev/null || true
     append_event
     next_state="$(python3 - <<'PY'
 import json
@@ -220,10 +249,14 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
       set +e
-      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE"
+      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE" &
+      run_pid=$!
+      hb_pid=$(start_heartbeat "$run_pid")
+      wait "$run_pid"
       EXIT_CODE=${PIPESTATUS[0]}
       export EXIT_CODE
       set -e
+      kill "$hb_pid" 2>/dev/null || true
       append_event
     fi
     ;;
@@ -251,10 +284,14 @@ PY
     chain_count=0
     while true; do
       set +e
-      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE"
+      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE" &
+      run_pid=$!
+      hb_pid=$(start_heartbeat "$run_pid")
+      wait "$run_pid"
       EXIT_CODE=${PIPESTATUS[0]}
       export EXIT_CODE
       set -e
+      kill "$hb_pid" 2>/dev/null || true
       append_event
 
       next_state="$(python3 - <<'PY'
@@ -311,10 +348,14 @@ data['heartbeat_at'] = now
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/diagnose_step.sh 2>&1 | tee -a "$LOG_FILE"
+    bash scripts/diagnose_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    run_pid=$!
+    hb_pid=$(start_heartbeat "$run_pid")
+    wait "$run_pid"
     EXIT_CODE=${PIPESTATUS[0]}
     export EXIT_CODE
     set -e
+    kill "$hb_pid" 2>/dev/null || true
     append_event
     ;;
   RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING)

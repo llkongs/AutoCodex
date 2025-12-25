@@ -34,6 +34,7 @@ Web dashboard
 - Use the intake panel to answer questions and pause/resume projects.
 - Use "Run Tick" to trigger a new run and watch logs streaming in the log panel.
 - DEV auto-continues for up to 3 tasks per tick (override with DEV_CHAIN_LIMIT).
+- While a run is active, heartbeat_at is updated every 30 seconds.
 
 Project init
 - Default name is project-YYYYMMDD-HHMMSS if no name is provided.
