@@ -296,6 +296,23 @@ class Handler(BaseHTTPRequestHandler):
                     )
                     self._json({"ok": True})
                     return
+                if len(parts) == 5 and parts[3] == "review" and parts[4] == "continue":
+                    state_path = project / "STATE.json"
+                    now = int(__import__("time").time())
+                    write_state(
+                        state_path,
+                        {
+                            "state": "DEV_READY",
+                            "role": None,
+                            "run_id": None,
+                            "started_at": None,
+                            "updated_at": now,
+                            "heartbeat_at": now,
+                            "review_items": [],
+                        },
+                    )
+                    self._json({"ok": True})
+                    return
                 if len(parts) == 4 and parts[3] == "run":
                     subprocess.Popen(
                         ["bash", "scripts/tick.sh"],

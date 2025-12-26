@@ -376,6 +376,9 @@
           <h3>Review</h3>
           <div class="subtitle" id="reviewHint">No review pending.</div>
           <div class="tasks" id="reviewList"></div>
+          <div class="intake-actions">
+            <button class="btn alt" id="continueAfterReviewBtn">Continue After Review</button>
+          </div>
         </div>
 
         <div class="grid">
@@ -424,6 +427,7 @@
       const followLogs = document.getElementById("followLogs");
       const reviewList = document.getElementById("reviewList");
       const reviewHint = document.getElementById("reviewHint");
+      const continueAfterReviewBtn = document.getElementById("continueAfterReviewBtn");
       const reviewContent = document.getElementById("reviewContent");
 
       let currentProject = null;
@@ -563,6 +567,7 @@
         if (reviewData.state === "REVIEW_READY" && reviewData.items && reviewData.items.length > 0) {
           reviewHint.textContent =
             "Review required: click a file to preview. When done, click Run Tick to continue.";
+          continueAfterReviewBtn.disabled = false;
           reviewData.items.forEach((item) => {
             const row = document.createElement("div");
             row.className = "task";
@@ -585,6 +590,7 @@
           });
         } else {
           reviewHint.textContent = "No review pending.";
+          continueAfterReviewBtn.disabled = true;
         }
 
         const logKey = `${logs.file || "none"}:${logs.mtime || 0}:${logs.size || 0}`;
@@ -630,6 +636,13 @@
 
       runBtn.addEventListener("click", async () => {
         if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/run`, {});
+        await refreshAll();
+      });
+
+      continueAfterReviewBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/review/continue`, {});
         await postJSON(`/api/projects/${currentProject}/run`, {});
         await refreshAll();
       });
