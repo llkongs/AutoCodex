@@ -480,17 +480,17 @@
 
         <div class="section">
           <div class="tabs">
-            <button class="tab active" data-tab="interactionTab">Interaction</button>
+            <button class="tab active" data-tab="mainTab">Main</button>
             <button class="tab" data-tab="reviewTab">Review</button>
           </div>
-          <div id="interactionTab" class="tab-panel active">
+          <div id="mainTab" class="tab-panel active">
             <h3>Interaction</h3>
             <div class="controls" style="margin-bottom: 8px;">
-            <label class="toggle switch">
-              <input type="checkbox" id="interactiveModeToggle" />
-              <span class="slider"></span>
-              Interactive Mode
-            </label>
+              <label class="toggle switch">
+                <input type="checkbox" id="interactiveModeToggle" />
+                <span class="slider"></span>
+                Interactive Mode
+              </label>
               <span id="interactionState">State: --</span>
             </div>
             <textarea id="interactionNotes" placeholder="Type notes for the agent here."></textarea>
@@ -510,6 +510,22 @@
               <button class="btn alt" id="pauseBtn">Pause Project</button>
               <button class="btn alt" id="runBtn">Run Tick</button>
             </div>
+            <div class="grid" style="margin-top: 18px;">
+              <div class="stack">
+                <div class="section">
+                  <h3>Task List</h3>
+                  <div class="tasks" id="taskList"></div>
+                </div>
+                <div class="section">
+                  <h3>Recent Events</h3>
+                  <div class="tasks" id="eventList"></div>
+                </div>
+              </div>
+              <div class="section">
+                <h3>Latest Log Tail</h3>
+                <div class="log" id="logBox">No logs.</div>
+              </div>
+            </div>
           </div>
           <div id="reviewTab" class="tab-panel">
             <h3>Review</h3>
@@ -518,29 +534,14 @@
             <div class="intake-actions">
               <button class="btn alt" id="continueAfterReviewBtn">Continue After Review</button>
             </div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="stack">
-            <div class="section">
-              <h3>Task List</h3>
-              <div class="tasks" id="taskList"></div>
-            </div>
-            <div class="section">
-              <h3>Recent Events</h3>
-              <div class="tasks" id="eventList"></div>
-            </div>
-            <div class="section">
+            <div class="section" style="margin-top: 16px;">
               <h3>Review Content</h3>
               <div class="review-content" id="reviewContent">Select a file to preview.</div>
             </div>
           </div>
-          <div class="section">
-            <h3>Latest Log Tail</h3>
-            <div class="log" id="logBox">No logs.</div>
-          </div>
         </div>
+
+        
       </main>
     </div>
 
