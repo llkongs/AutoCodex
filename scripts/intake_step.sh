@@ -14,6 +14,7 @@ PY
 
 if [ -s "INTAKE_ANSWERS.md" ]; then
   codex exec --full-auto "You are the intake coordinator. Read INTAKE_ANSWERS.md, ROLES.md, SPEC.md, TASKS.yaml, STATE.json, and notes/interaction_notes.md if it exists.
+If STATE.json.interactive_mode is false, do not ask the user questions or require approvals; proceed with reasonable assumptions and record them.
 1) Use the answers to define required roles and prompts in ROLES.md.
 2) Update SPEC.md with clear goals, requirements, and acceptance criteria.
 3) If any confirmation is still missing:
