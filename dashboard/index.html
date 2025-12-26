@@ -369,6 +369,48 @@
         color: var(--muted);
       }
 
+      .switch {
+        gap: 10px;
+      }
+
+      .switch input {
+        display: none;
+      }
+
+      .switch .slider {
+        position: relative;
+        width: 44px;
+        height: 22px;
+        background: rgba(36, 20, 63, 0.9);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        transition: all 0.2s ease;
+        box-shadow: inset 0 0 12px rgba(40, 240, 255, 0.2);
+      }
+
+      .switch .slider::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(40, 240, 255, 0.6);
+        transition: all 0.2s ease;
+      }
+
+      .switch input:checked + .slider {
+        background: rgba(40, 240, 255, 0.25);
+        border-color: var(--accent);
+        box-shadow: 0 0 14px rgba(40, 240, 255, 0.35);
+      }
+
+      .switch input:checked + .slider::after {
+        transform: translateX(22px);
+      }
+
       @media (max-width: 900px) {
         .shell {
           grid-template-columns: 1fr;
@@ -444,10 +486,11 @@
           <div id="interactionTab" class="tab-panel active">
             <h3>Interaction</h3>
             <div class="controls" style="margin-bottom: 8px;">
-              <label class="toggle">
-                <input type="checkbox" id="interactiveModeToggle" />
-                Interactive Mode
-              </label>
+            <label class="toggle switch">
+              <input type="checkbox" id="interactiveModeToggle" />
+              <span class="slider"></span>
+              Interactive Mode
+            </label>
               <span id="interactionState">State: --</span>
             </div>
             <textarea id="interactionNotes" placeholder="Type notes for the agent here."></textarea>
@@ -738,8 +781,17 @@
       interactionNotes.addEventListener("input", () => {
         interactionDirty = true;
       });
-      interactiveModeToggle.addEventListener("change", () => {
-        interactionDirty = true;
+      interactiveModeToggle.addEventListener("change", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/interaction`, {
+          notes: interactionNotes.value || "",
+          interactive_mode: interactiveModeToggle.checked,
+        });
+        interactionDirty = false;
+        if (!interactiveModeToggle.checked) {
+          await postJSON(`/api/projects/${currentProject}/run`, {});
+        }
+        await refreshAll();
       });
 
       saveIntakeBtn.addEventListener("click", async () => {
