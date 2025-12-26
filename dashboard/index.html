@@ -6,16 +6,16 @@
     <title>AutoCodex Dashboard</title>
     <style>
       :root {
-        --bg: #0a0b14;
-        --panel: #141625;
-        --panel-2: #1a1d33;
-        --ink: #e9f2ff;
-        --muted: #93a1c8;
-        --accent: #28f0ff;
-        --accent-2: #ff3b8d;
-        --warning: #ffb454;
-        --border: #2a2f52;
-        --shadow: rgba(5, 6, 14, 0.7);
+        --bg: #0b0614;
+        --panel: #1a0f2e;
+        --panel-2: #24143f;
+        --ink: #f2eaff;
+        --muted: #c7a9ff;
+        --accent: #ff2d9a;
+        --accent-2: #7dfffb;
+        --warning: #ffd166;
+        --border: #3a1f6f;
+        --shadow: rgba(7, 3, 18, 0.75);
         --radius: 18px;
         --mono: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
         --sans: "Rajdhani", "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -30,11 +30,28 @@
         font-family: var(--sans);
         color: var(--ink);
         background:
-          radial-gradient(circle at 15% 15%, rgba(40, 240, 255, 0.15), transparent 40%),
-          radial-gradient(circle at 80% 10%, rgba(255, 59, 141, 0.2), transparent 35%),
-          radial-gradient(circle at 50% 80%, rgba(42, 39, 109, 0.4), transparent 55%),
-          linear-gradient(180deg, #070812 0%, #0b0d1c 60%, #070812 100%);
+          radial-gradient(circle at 20% 10%, rgba(255, 45, 154, 0.25), transparent 45%),
+          radial-gradient(circle at 80% 15%, rgba(125, 255, 251, 0.2), transparent 40%),
+          radial-gradient(circle at 50% 80%, rgba(128, 64, 255, 0.35), transparent 55%),
+          linear-gradient(180deg, #0a0615 0%, #12091f 55%, #090513 100%);
         min-height: 100vh;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(255, 45, 154, 0.08), transparent 35%),
+          repeating-linear-gradient(
+            120deg,
+            rgba(255, 45, 154, 0.06) 0px,
+            rgba(255, 45, 154, 0.06) 1px,
+            transparent 1px,
+            transparent 6px
+          );
+        mix-blend-mode: screen;
+        pointer-events: none;
       }
 
       header {
@@ -49,7 +66,7 @@
         font-weight: 600;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        text-shadow: 0 0 12px rgba(40, 240, 255, 0.45);
+        text-shadow: 0 0 14px rgba(255, 45, 154, 0.65);
       }
 
       .subtitle {
@@ -105,11 +122,11 @@
 
       .project.active {
         border-color: var(--accent);
-        box-shadow: inset 0 0 0 1px rgba(123, 224, 164, 0.4);
+        box-shadow: inset 0 0 0 1px rgba(255, 45, 154, 0.45);
       }
 
       .project:hover {
-        border-color: rgba(123, 224, 164, 0.5);
+        border-color: rgba(255, 45, 154, 0.6);
       }
 
       .main {
@@ -143,7 +160,7 @@
       .card .value {
         font-size: 22px;
         font-weight: 600;
-        text-shadow: 0 0 10px rgba(40, 240, 255, 0.25);
+        text-shadow: 0 0 10px rgba(255, 45, 154, 0.4);
       }
 
       .badge {
@@ -152,7 +169,7 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(40, 240, 255, 0.15);
+        background: rgba(255, 45, 154, 0.18);
         color: var(--accent);
         font-size: 13px;
       }
@@ -193,9 +210,9 @@
       .intake-box textarea {
         width: 100%;
         min-height: 140px;
-        background: #0a0c1c;
+        background: #0f0a1f;
         color: var(--ink);
-        border: 1px solid rgba(42, 52, 47, 0.9);
+        border: 1px solid rgba(58, 31, 111, 0.9);
         border-radius: 10px;
         padding: 10px;
         font-family: var(--mono);
@@ -206,9 +223,9 @@
       #interactionNotes {
         width: 100%;
         min-height: 140px;
-        background: #0a0c1c;
+        background: #0f0a1f;
         color: var(--ink);
-        border: 1px solid rgba(42, 52, 47, 0.9);
+        border: 1px solid rgba(58, 31, 111, 0.9);
         border-radius: 10px;
         padding: 10px;
         font-family: var(--mono);
@@ -238,8 +255,8 @@
         gap: 8px;
         padding: 8px 10px;
         border-radius: 10px;
-        background: rgba(10, 12, 26, 0.65);
-        border: 1px solid rgba(42, 52, 47, 0.8);
+        background: rgba(20, 10, 40, 0.7);
+        border: 1px solid rgba(58, 31, 111, 0.8);
       }
 
       .task .name {
@@ -255,9 +272,9 @@
         font-family: var(--mono);
         font-size: 13px;
         line-height: 1.5;
-        background: #0a0c1c;
+        background: #0f0a1f;
         border-radius: 12px;
-        border: 1px solid rgba(42, 52, 47, 0.9);
+        border: 1px solid rgba(58, 31, 111, 0.9);
         padding: 12px;
         height: 320px;
         overflow: auto;
@@ -268,9 +285,9 @@
         font-family: var(--mono);
         font-size: 13px;
         line-height: 1.5;
-        background: #0a0c1c;
+        background: #0f0a1f;
         border-radius: 12px;
-        border: 1px solid rgba(42, 52, 47, 0.9);
+        border: 1px solid rgba(58, 31, 111, 0.9);
         padding: 12px;
         height: 220px;
         overflow: auto;
@@ -287,13 +304,13 @@
 
       .btn {
         background: var(--accent);
-        color: #061016;
+        color: #120515;
         border: none;
         padding: 8px 12px;
         border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        box-shadow: 0 0 14px rgba(40, 240, 255, 0.4);
+        box-shadow: 0 0 16px rgba(255, 45, 154, 0.55);
       }
 
       .btn.alt {
@@ -324,7 +341,7 @@
       .tab.active {
         border-color: var(--accent);
         color: var(--accent);
-        box-shadow: 0 0 16px rgba(40, 240, 255, 0.35);
+        box-shadow: 0 0 16px rgba(255, 45, 154, 0.45);
       }
 
       .tab-panel {
