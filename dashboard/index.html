@@ -374,6 +374,7 @@
 
         <div class="section">
           <h3>Review</h3>
+          <div class="subtitle" id="reviewHint">No review pending.</div>
           <div class="tasks" id="reviewList"></div>
         </div>
 
@@ -422,6 +423,7 @@
       const runBtn = document.getElementById("runBtn");
       const followLogs = document.getElementById("followLogs");
       const reviewList = document.getElementById("reviewList");
+      const reviewHint = document.getElementById("reviewHint");
       const reviewContent = document.getElementById("reviewContent");
 
       let currentProject = null;
@@ -559,6 +561,8 @@
 
         reviewList.innerHTML = "";
         if (reviewData.state === "REVIEW_READY" && reviewData.items && reviewData.items.length > 0) {
+          reviewHint.textContent =
+            "Review required: click a file to preview. When done, click Run Tick to continue.";
           reviewData.items.forEach((item) => {
             const row = document.createElement("div");
             row.className = "task";
@@ -580,13 +584,7 @@
             reviewList.appendChild(row);
           });
         } else {
-          const row = document.createElement("div");
-          row.className = "task";
-          const name = document.createElement("div");
-          name.className = "name";
-          name.textContent = "No review pending.";
-          row.appendChild(name);
-          reviewList.appendChild(row);
+          reviewHint.textContent = "No review pending.";
         }
 
         const logKey = `${logs.file || "none"}:${logs.mtime || 0}:${logs.size || 0}`;
