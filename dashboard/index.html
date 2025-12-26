@@ -6,19 +6,19 @@
     <title>AutoCodex Dashboard</title>
     <style>
       :root {
-        --bg: #0f1411;
-        --panel: #151c18;
-        --panel-2: #1b241f;
-        --ink: #e7f4e9;
-        --muted: #b4c4b8;
-        --accent: #7be0a4;
-        --accent-2: #f6b26b;
-        --warning: #f08a5d;
-        --border: #2a342f;
-        --shadow: rgba(8, 12, 10, 0.5);
-        --radius: 16px;
+        --bg: #0a0b14;
+        --panel: #141625;
+        --panel-2: #1a1d33;
+        --ink: #e9f2ff;
+        --muted: #93a1c8;
+        --accent: #28f0ff;
+        --accent-2: #ff3b8d;
+        --warning: #ffb454;
+        --border: #2a2f52;
+        --shadow: rgba(5, 6, 14, 0.7);
+        --radius: 18px;
         --mono: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-        --sans: "Space Grotesk", "IBM Plex Sans", "Manrope", "Segoe UI", sans-serif;
+        --sans: "Rajdhani", "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
       }
 
       * {
@@ -30,9 +30,10 @@
         font-family: var(--sans);
         color: var(--ink);
         background:
-          radial-gradient(circle at 15% 15%, rgba(123, 224, 164, 0.12), transparent 40%),
-          radial-gradient(circle at 85% 10%, rgba(246, 178, 107, 0.16), transparent 35%),
-          linear-gradient(180deg, #0c110e 0%, #111714 55%, #0c110e 100%);
+          radial-gradient(circle at 15% 15%, rgba(40, 240, 255, 0.15), transparent 40%),
+          radial-gradient(circle at 80% 10%, rgba(255, 59, 141, 0.2), transparent 35%),
+          radial-gradient(circle at 50% 80%, rgba(42, 39, 109, 0.4), transparent 55%),
+          linear-gradient(180deg, #070812 0%, #0b0d1c 60%, #070812 100%);
         min-height: 100vh;
       }
 
@@ -44,14 +45,16 @@
       }
 
       .title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 600;
-        letter-spacing: 0.5px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        text-shadow: 0 0 12px rgba(40, 240, 255, 0.45);
       }
 
       .subtitle {
         color: var(--muted);
-        font-size: 14px;
+        font-size: 15px;
         margin-top: 4px;
       }
 
@@ -66,7 +69,7 @@
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        box-shadow: 0 12px 30px var(--shadow);
+        box-shadow: 0 16px 36px var(--shadow);
       }
 
       .side {
@@ -97,6 +100,7 @@
         border: 1px solid transparent;
         cursor: pointer;
         transition: all 0.2s ease;
+        font-size: 14px;
       }
 
       .project.active {
@@ -137,8 +141,9 @@
       }
 
       .card .value {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 600;
+        text-shadow: 0 0 10px rgba(40, 240, 255, 0.25);
       }
 
       .badge {
@@ -147,9 +152,9 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(123, 224, 164, 0.16);
+        background: rgba(40, 240, 255, 0.15);
         color: var(--accent);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .grid {
@@ -173,7 +178,7 @@
 
       .section h3 {
         margin: 0 0 12px;
-        font-size: 14px;
+        font-size: 15px;
         text-transform: uppercase;
         letter-spacing: 1px;
         color: var(--muted);
@@ -188,26 +193,26 @@
       .intake-box textarea {
         width: 100%;
         min-height: 140px;
-        background: #0d120f;
+        background: #0a0c1c;
         color: var(--ink);
         border: 1px solid rgba(42, 52, 47, 0.9);
         border-radius: 10px;
         padding: 10px;
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
       #interactionNotes {
         width: 100%;
         min-height: 140px;
-        background: #0d120f;
+        background: #0a0c1c;
         color: var(--ink);
         border: 1px solid rgba(42, 52, 47, 0.9);
         border-radius: 10px;
         padding: 10px;
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
@@ -233,7 +238,7 @@
         gap: 8px;
         padding: 8px 10px;
         border-radius: 10px;
-        background: rgba(15, 20, 17, 0.6);
+        background: rgba(10, 12, 26, 0.65);
         border: 1px solid rgba(42, 52, 47, 0.8);
       }
 
@@ -248,9 +253,9 @@
 
       .log {
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
-        background: #0d120f;
+        background: #0a0c1c;
         border-radius: 12px;
         border: 1px solid rgba(42, 52, 47, 0.9);
         padding: 12px;
@@ -261,9 +266,9 @@
 
       .review-content {
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
-        background: #0d120f;
+        background: #0a0c1c;
         border-radius: 12px;
         border: 1px solid rgba(42, 52, 47, 0.9);
         padding: 12px;
@@ -282,18 +287,61 @@
 
       .btn {
         background: var(--accent);
-        color: #0b120e;
+        color: #061016;
         border: none;
         padding: 8px 12px;
         border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
+        box-shadow: 0 0 14px rgba(40, 240, 255, 0.4);
       }
 
       .btn.alt {
         background: transparent;
         color: var(--ink);
         border: 1px solid var(--border);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .tab {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+      }
+
+      .tab.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        box-shadow: 0 0 16px rgba(40, 240, 255, 0.35);
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      @keyframes glowIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .panel, .section {
+        animation: glowIn 0.4s ease-out;
       }
 
       .toggle {
@@ -372,42 +420,44 @@
         </div>
 
         <div class="section">
-          <h3>Intake</h3>
-          <div class="intake-box">
-            <textarea id="intakeQuestions" readonly placeholder="Questions will appear here."></textarea>
-            <textarea id="intakeAnswers" placeholder="Write your answers here."></textarea>
+          <div class="tabs">
+            <button class="tab active" data-tab="interactionTab">Interaction</button>
+            <button class="tab" data-tab="reviewTab">Review</button>
           </div>
-          <div class="intake-actions">
-            <button class="btn" id="saveIntakeBtn">Save Answers</button>
-            <button class="btn alt" id="resumeBtn">Resume Intake</button>
-            <button class="btn alt" id="pauseBtn">Pause Project</button>
-            <button class="btn alt" id="runBtn">Run Tick</button>
+          <div id="interactionTab" class="tab-panel active">
+            <h3>Interaction</h3>
+            <div class="controls" style="margin-bottom: 8px;">
+              <label class="toggle">
+                <input type="checkbox" id="interactiveModeToggle" />
+                Interactive Mode
+              </label>
+              <span id="interactionState">State: --</span>
+            </div>
+            <textarea id="interactionNotes" placeholder="Type notes for the agent here."></textarea>
+            <div class="intake-actions">
+              <button class="btn" id="saveInteractionBtn">Save Notes</button>
+              <button class="btn alt" id="interruptBtn">Interrupt Now</button>
+              <button class="btn alt" id="continueBtn">Continue</button>
+            </div>
+            <h3 style="margin-top: 18px;">Intake</h3>
+            <div class="intake-box">
+              <textarea id="intakeQuestions" readonly placeholder="Questions will appear here."></textarea>
+              <textarea id="intakeAnswers" placeholder="Write your answers here."></textarea>
+            </div>
+            <div class="intake-actions">
+              <button class="btn" id="saveIntakeBtn">Save Answers</button>
+              <button class="btn alt" id="resumeBtn">Resume Intake</button>
+              <button class="btn alt" id="pauseBtn">Pause Project</button>
+              <button class="btn alt" id="runBtn">Run Tick</button>
+            </div>
           </div>
-        </div>
-
-        <div class="section">
-          <h3>Interaction</h3>
-          <div class="controls" style="margin-bottom: 8px;">
-            <label class="toggle">
-              <input type="checkbox" id="interactiveModeToggle" />
-              Interactive Mode
-            </label>
-            <span id="interactionState">State: --</span>
-          </div>
-          <textarea id="interactionNotes" placeholder="Type notes for the agent here."></textarea>
-          <div class="intake-actions">
-            <button class="btn" id="saveInteractionBtn">Save Notes</button>
-            <button class="btn alt" id="interruptBtn">Interrupt Now</button>
-            <button class="btn alt" id="continueBtn">Continue</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Review</h3>
-          <div class="subtitle" id="reviewHint">No review pending.</div>
-          <div class="tasks" id="reviewList"></div>
-          <div class="intake-actions">
-            <button class="btn alt" id="continueAfterReviewBtn">Continue After Review</button>
+          <div id="reviewTab" class="tab-panel">
+            <h3>Review</h3>
+            <div class="subtitle" id="reviewHint">No review pending.</div>
+            <div class="tasks" id="reviewList"></div>
+            <div class="intake-actions">
+              <button class="btn alt" id="continueAfterReviewBtn">Continue After Review</button>
+            </div>
           </div>
         </div>
 
@@ -465,6 +515,8 @@
       const interruptBtn = document.getElementById("interruptBtn");
       const continueBtn = document.getElementById("continueBtn");
       const interactionState = document.getElementById("interactionState");
+      const tabs = document.querySelectorAll(".tab");
+      const tabPanels = document.querySelectorAll(".tab-panel");
 
       let currentProject = null;
       let timer = null;
@@ -485,6 +537,15 @@
       function updateTimestamp() {
         const now = new Date();
         lastUpdated.textContent = `Last update: ${now.toLocaleTimeString()}`;
+      }
+
+      function setActiveTab(tabId) {
+        tabs.forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.tab === tabId);
+        });
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === tabId);
+        });
       }
 
       async function fetchJSON(path) {
@@ -723,6 +784,11 @@
       });
 
       refreshBtn.addEventListener("click", refreshAll);
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          setActiveTab(tab.dataset.tab);
+        });
+      });
 
       async function start() {
         await loadProjects();
