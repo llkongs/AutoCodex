@@ -315,8 +315,24 @@ class Handler(BaseHTTPRequestHandler):
                     notes_path = project / "notes" / "interaction_notes.md"
                     notes_path.parent.mkdir(parents=True, exist_ok=True)
                     notes_path.write_text(notes)
+                    state_path = project / "STATE.json"
                     if "interactive_mode" in payload:
-                        write_state(project / "STATE.json", {"interactive_mode": bool(payload["interactive_mode"])})
+                        interactive = bool(payload["interactive_mode"])
+                        state = read_json(state_path)
+                        updates = {"interactive_mode": interactive}
+                        if not interactive and state.get("state") in ("REVIEW_READY", "REVIEW_WAITING", "PAUSE_INTERACT"):
+                            updates.update(
+                                {
+                                    "state": "DEV_READY",
+                                    "resume_state": None,
+                                    "role": None,
+                                    "run_id": None,
+                                    "started_at": None,
+                                    "updated_at": int(__import__("time").time()),
+                                    "heartbeat_at": int(__import__("time").time()),
+                                }
+                            )
+                        write_state(state_path, updates)
                     self._json({"ok": True})
                     return
                 if len(parts) == 5 and parts[3] == "interaction" and parts[4] == "pause":
