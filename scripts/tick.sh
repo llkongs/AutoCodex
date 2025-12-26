@@ -72,6 +72,48 @@ should_interrupt() {
   return 1
 }
 
+auto_approve_outline_if_needed() {
+  if [ "$(is_interactive)" = "true" ]; then
+    return
+  fi
+  python3 - <<'PY'
+from pathlib import Path
+import re, time
+
+tasks_path = Path("TASKS.yaml")
+if not tasks_path.exists():
+    raise SystemExit
+
+text = tasks_path.read_text()
+if "Outline approval checkpoint" not in text:
+    raise SystemExit
+
+lines = text.splitlines()
+out = []
+in_target = False
+changed = False
+for line in lines:
+    if re.match(r"^\s*-\s+id:\s*T10\b", line) or "Outline approval checkpoint" in line:
+        in_target = True
+    if in_target and re.match(r"^\s*status:\s*blocked\b", line):
+        out.append(line.replace("status: blocked", "status: done"))
+        changed = True
+        in_target = False
+        continue
+    out.append(line)
+    if in_target and re.match(r"^\s*-\s+id:\s*", line) and "T10" not in line:
+        in_target = False
+
+if changed:
+    tasks_path.write_text("\n".join(out) + "\n")
+    notes = Path("notes")
+    notes.mkdir(parents=True, exist_ok=True)
+    approval = notes / "outline_approval.md"
+    if not approval.exists():
+        approval.write_text(f"# Outline Approval\n\nAuto-approved (interactive_mode=false) at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+PY
+}
+
 wait_for_review() {
   local approval_file="notes/review_approval.md"
   if [ "$(is_interactive)" != "true" ]; then
@@ -255,6 +297,8 @@ with open('STATE.json','r') as f:
     print(json.load(f).get('state',''))
 PY
 )"
+
+auto_approve_outline_if_needed
 
 echo "[tick] state=$state run_id=$RUN_ID" | tee -a "$LOG_FILE"
 
