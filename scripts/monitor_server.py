@@ -200,6 +200,20 @@ class Handler(BaseHTTPRequestHandler):
                         answers = a_path.read_text()
                     self._json({"questions": questions, "answers": answers})
                     return
+                if len(parts) == 4 and parts[3] == "interaction":
+                    notes_path = project / "notes" / "interaction_notes.md"
+                    notes_path.parent.mkdir(parents=True, exist_ok=True)
+                    notes = notes_path.read_text() if notes_path.exists() else ""
+                    state = read_json(project / "STATE.json")
+                    self._json(
+                        {
+                            "notes": notes,
+                            "interactive_mode": bool(state.get("interactive_mode", True)),
+                            "state": state.get("state", ""),
+                            "resume_state": state.get("resume_state", ""),
+                        }
+                    )
+                    return
                 if len(parts) == 4 and parts[3] == "review":
                     state = read_json(project / "STATE.json").get("state", "")
                     review_items = read_json(project / "STATE.json").get("review_items", [])
@@ -294,6 +308,54 @@ class Handler(BaseHTTPRequestHandler):
                             "heartbeat_at": now,
                         },
                     )
+                    self._json({"ok": True})
+                    return
+                if len(parts) == 4 and parts[3] == "interaction":
+                    notes = payload.get("notes", "")
+                    notes_path = project / "notes" / "interaction_notes.md"
+                    notes_path.parent.mkdir(parents=True, exist_ok=True)
+                    notes_path.write_text(notes)
+                    if "interactive_mode" in payload:
+                        write_state(project / "STATE.json", {"interactive_mode": bool(payload["interactive_mode"])})
+                    self._json({"ok": True})
+                    return
+                if len(parts) == 5 and parts[3] == "interaction" and parts[4] == "pause":
+                    state_path = project / "STATE.json"
+                    state = read_json(state_path)
+                    (project / "notes" / "interrupt.flag").write_text("pause")
+                    if state.get("state") != "RUNNING":
+                        now = int(__import__("time").time())
+                        write_state(
+                            state_path,
+                            {
+                                "state": "PAUSE_INTERACT",
+                                "resume_state": state.get("state", "DEV_READY"),
+                                "updated_at": now,
+                                "heartbeat_at": now,
+                            },
+                        )
+                    self._json({"ok": True})
+                    return
+                if len(parts) == 5 and parts[3] == "interaction" and parts[4] == "continue":
+                    state_path = project / "STATE.json"
+                    state = read_json(state_path)
+                    resume = state.get("resume_state") or "DEV_READY"
+                    now = int(__import__("time").time())
+                    write_state(
+                        state_path,
+                        {
+                            "state": resume,
+                            "resume_state": None,
+                            "role": None,
+                            "run_id": None,
+                            "started_at": None,
+                            "updated_at": now,
+                            "heartbeat_at": now,
+                        },
+                    )
+                    flag = project / "notes" / "interrupt.flag"
+                    if flag.exists():
+                        flag.unlink()
                     self._json({"ok": True})
                     return
                 if len(parts) == 5 and parts[3] == "review" and parts[4] == "continue":

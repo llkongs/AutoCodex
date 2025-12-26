@@ -56,8 +56,42 @@ path.write_text(json.dumps(data, indent=2))
 PY
 }
 
+is_interactive() {
+  python3 - <<'PY'
+import json
+from pathlib import Path
+data = json.loads(Path('STATE.json').read_text())
+print(str(bool(data.get('interactive_mode', True))).lower())
+PY
+}
+
+should_interrupt() {
+  if [ -f "notes/interrupt.flag" ] && [ "$(is_interactive)" = "true" ]; then
+    return 0
+  fi
+  return 1
+}
+
 wait_for_review() {
   local approval_file="notes/review_approval.md"
+  if [ "$(is_interactive)" != "true" ]; then
+    python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'DEV_READY'
+data['role'] = None
+data['run_id'] = None
+data['started_at'] = None
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+    return
+  fi
   python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -97,6 +131,37 @@ print(json.loads(Path('STATE.json').read_text()).get('state',''))
 PY
 )"
     if [ "$state_now" != "REVIEW_WAITING" ]; then
+      break
+    fi
+    update_heartbeat
+    sleep 10
+  done
+}
+
+wait_for_interact() {
+  local resume="$1"
+  python3 - <<'PY'
+import json, time, os
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'PAUSE_INTERACT'
+data['resume_state'] = os.environ.get('RESUME_STATE', '')
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+
+  while true; do
+    state_now="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+    if [ "$state_now" != "PAUSE_INTERACT" ]; then
       break
     fi
     update_heartbeat
@@ -145,6 +210,12 @@ if data.get('state') in ('INTAKE_READY', 'SPEC_READY', 'DEV_READY'):
     if data.get('last_error') is None:
         data['diagnosis_done'] = False
         data['resume_state'] = None
+
+if data.get('state') == 'REVIEW_WAITING':
+    action = 'none'
+
+if data.get('state') == 'PAUSE_INTERACT':
+    action = 'none'
 
 path.write_text(json.dumps(data, indent=2))
 print(action)
@@ -234,6 +305,22 @@ PY
 
 case "$state" in
   INTAKE_READY)
+    if [ "$(is_interactive)" != "true" ]; then
+      python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'SPEC_READY'
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+      echo "[tick] interactive_mode=false; skipping intake." | tee -a "$LOG_FILE"
+      exit 0
+    fi
     STATE_BEFORE="$state"
     ROLE_NAME="INTAKE"
     export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
@@ -294,6 +381,11 @@ PY
     set -e
     kill "$hb_pid" 2>/dev/null || true
     append_event
+    if should_interrupt; then
+      RESUME_STATE="DEV_READY"
+      export RESUME_STATE
+      wait_for_interact "$RESUME_STATE"
+    fi
     next_state="$(python3 - <<'PY'
 import json
 from pathlib import Path
@@ -330,6 +422,11 @@ PY
       set -e
       kill "$hb_pid" 2>/dev/null || true
       append_event
+      if should_interrupt; then
+        RESUME_STATE="DEV_READY"
+        export RESUME_STATE
+        wait_for_interact "$RESUME_STATE"
+      fi
       next_state="$(python3 - <<'PY'
 import json
 from pathlib import Path
@@ -374,7 +471,6 @@ PY
       set -e
       kill "$hb_pid" 2>/dev/null || true
       append_event
-
       next_state="$(python3 - <<'PY'
 import json
 from pathlib import Path
@@ -448,7 +544,7 @@ PY
     kill "$hb_pid" 2>/dev/null || true
     append_event
     ;;
-  RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING|REVIEW_WAITING)
+  RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING|REVIEW_WAITING|PAUSE_INTERACT)
     echo "[tick] no action for state=$state" | tee -a "$LOG_FILE"
     ;;
   *)

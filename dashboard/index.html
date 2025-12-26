@@ -198,6 +198,19 @@
         line-height: 1.5;
       }
 
+      #interactionNotes {
+        width: 100%;
+        min-height: 140px;
+        background: #0d120f;
+        color: var(--ink);
+        border: 1px solid rgba(42, 52, 47, 0.9);
+        border-radius: 10px;
+        padding: 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
       .intake-actions {
         display: flex;
         gap: 8px;
@@ -373,6 +386,23 @@
         </div>
 
         <div class="section">
+          <h3>Interaction</h3>
+          <div class="controls" style="margin-bottom: 8px;">
+            <label class="toggle">
+              <input type="checkbox" id="interactiveModeToggle" />
+              Interactive Mode
+            </label>
+            <span id="interactionState">State: --</span>
+          </div>
+          <textarea id="interactionNotes" placeholder="Type notes for the agent here."></textarea>
+          <div class="intake-actions">
+            <button class="btn" id="saveInteractionBtn">Save Notes</button>
+            <button class="btn alt" id="interruptBtn">Interrupt Now</button>
+            <button class="btn alt" id="continueBtn">Continue</button>
+          </div>
+        </div>
+
+        <div class="section">
           <h3>Review</h3>
           <div class="subtitle" id="reviewHint">No review pending.</div>
           <div class="tasks" id="reviewList"></div>
@@ -429,10 +459,17 @@
       const reviewHint = document.getElementById("reviewHint");
       const continueAfterReviewBtn = document.getElementById("continueAfterReviewBtn");
       const reviewContent = document.getElementById("reviewContent");
+      const interactionNotes = document.getElementById("interactionNotes");
+      const interactiveModeToggle = document.getElementById("interactiveModeToggle");
+      const saveInteractionBtn = document.getElementById("saveInteractionBtn");
+      const interruptBtn = document.getElementById("interruptBtn");
+      const continueBtn = document.getElementById("continueBtn");
+      const interactionState = document.getElementById("interactionState");
 
       let currentProject = null;
       let timer = null;
       let intakeDirty = false;
+      let interactionDirty = false;
       let lastLogKey = "";
 
       function secondsToHuman(seconds) {
@@ -489,13 +526,14 @@
 
       async function refreshAll(forceLogs = false) {
         if (!currentProject) return;
-        const [state, tasks, logs, eventsData, intakeData, reviewData] = await Promise.all([
+        const [state, tasks, logs, eventsData, intakeData, reviewData, interactionData] = await Promise.all([
           fetchJSON(`/api/projects/${currentProject}/state`),
           fetchJSON(`/api/projects/${currentProject}/tasks`),
           fetchJSON(`/api/projects/${currentProject}/logs?tail=200`),
           fetchJSON(`/api/projects/${currentProject}/events?tail=50`),
           fetchJSON(`/api/projects/${currentProject}/intake`),
           fetchJSON(`/api/projects/${currentProject}/review`),
+          fetchJSON(`/api/projects/${currentProject}/interaction`),
         ]);
 
         const now = Math.floor(Date.now() / 1000);
@@ -563,6 +601,13 @@
           intakeAnswers.value = intakeData.answers || "";
         }
 
+        interactionState.textContent = `State: ${interactionData.state || "--"}`;
+        interactiveModeToggle.checked = !!interactionData.interactive_mode;
+        const interactionFocused = document.activeElement === interactionNotes;
+        if (!interactionDirty && !interactionFocused) {
+          interactionNotes.value = interactionData.notes || "";
+        }
+
         reviewList.innerHTML = "";
         if (reviewData.state === "REVIEW_READY" && reviewData.items && reviewData.items.length > 0) {
           reviewHint.textContent =
@@ -612,6 +657,13 @@
         intakeDirty = true;
       });
 
+      interactionNotes.addEventListener("input", () => {
+        interactionDirty = true;
+      });
+      interactiveModeToggle.addEventListener("change", () => {
+        interactionDirty = true;
+      });
+
       saveIntakeBtn.addEventListener("click", async () => {
         if (!currentProject) return;
         await postJSON(`/api/projects/${currentProject}/intake`, {
@@ -636,6 +688,29 @@
 
       runBtn.addEventListener("click", async () => {
         if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/run`, {});
+        await refreshAll();
+      });
+
+      saveInteractionBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/interaction`, {
+          notes: interactionNotes.value || "",
+          interactive_mode: interactiveModeToggle.checked,
+        });
+        interactionDirty = false;
+        await refreshAll();
+      });
+
+      interruptBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/interaction/pause`, {});
+        await refreshAll();
+      });
+
+      continueBtn.addEventListener("click", async () => {
+        if (!currentProject) return;
+        await postJSON(`/api/projects/${currentProject}/interaction/continue`, {});
         await postJSON(`/api/projects/${currentProject}/run`, {});
         await refreshAll();
       });

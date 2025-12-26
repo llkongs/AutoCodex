@@ -18,5 +18,6 @@ Roles
 - DEV role: implement tasks, run verification, update task status and state.
 
 State flow
-INTAKE_READY -> INTAKE_WAITING -> SPEC_READY -> DEV_READY -> REVIEW_READY or SPEC_READY
+INTAKE_READY -> INTAKE_WAITING -> SPEC_READY -> DEV_READY -> REVIEW_READY -> REVIEW_WAITING or SPEC_READY
+PAUSE_INTERACT can interrupt at any time when interactive_mode is true.
 DONE ends the loop. ERROR requires manual intervention.

@@ -36,6 +36,8 @@ Web dashboard
 - DEV auto-continues for up to 3 tasks per tick (override with DEV_CHAIN_LIMIT).
 - While a run is active, heartbeat_at is updated every 30 seconds.
 - notes/context_snapshot.md is updated by PO/DEV for restart fallback.
+- Interaction panel writes to notes/interaction_notes.md and supports interrupt/continue.
+- interactive_mode=true enables intake/review; set false to skip them.
 
 Project init
 - Default name is project-YYYYMMDD-HHMMSS if no name is provided.

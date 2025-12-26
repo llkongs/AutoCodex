@@ -4,7 +4,7 @@ set -euo pipefail
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$BASE_DIR"
 
-codex exec --full-auto "You are the developer. Read TASKS.yaml and STATE.json.
+codex exec --full-auto "You are the developer. Read TASKS.yaml, STATE.json, and notes/interaction_notes.md if it exists.
 1) Pick the highest priority unblocked task and implement it.
 2) If notes/context_snapshot.md exists, read it first and use it to avoid rereading large materials.
 3) Run the verification command(s) for the task (or the project's default tests if defined).
