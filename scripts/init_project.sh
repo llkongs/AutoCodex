@@ -60,6 +60,8 @@ data["diagnosis"] = None
 data["interactive_mode"] = True
 data["auto_run"] = False
 data["auto_run_pid"] = None
+data["plan_locked"] = False
+data["review_every_n_tasks"] = 5
 data["require_confirmations"] = True
 path.write_text(json.dumps(data, indent=2))
 PY

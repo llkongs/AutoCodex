@@ -13,6 +13,8 @@
   "interactive_mode": true,
   "auto_run": false,
   "auto_run_pid": null,
+  "plan_locked": false,
+  "review_every_n_tasks": 5,
   "require_confirmations": true,
   "last_error": null,
   "diagnosis": null

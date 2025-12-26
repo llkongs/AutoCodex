@@ -10,6 +10,7 @@ If STATE.json.interactive_mode is false, do not ask the user questions or requir
 2) Keep tasks ordered by priority and respect dependencies.
 3) Update STATE.json state to DEV_READY when planning is complete.
 4) Do not ask the user for confirmation; make reasonable assumptions and note them.
-5) Update notes/context_snapshot.md with the updated plan, assumptions, and next steps.
-6) Do not implement product code.
-7) Do not set STATE.json to RUNNING."
+5) Set STATE.json.plan_locked = true after planning to avoid re-planning loops.
+6) Update notes/context_snapshot.md with the updated plan, assumptions, and next steps.
+7) Do not implement product code.
+8) Do not set STATE.json to RUNNING."

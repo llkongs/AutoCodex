@@ -10,8 +10,11 @@ If STATE.json.interactive_mode is false, do not ask the user questions or requir
 2) If notes/context_snapshot.md exists, read it first and use it to avoid rereading large materials.
 3) Run the verification command(s) for the task (or the project's default tests if defined).
 4) Update TASKS.yaml status and add notes if needed.
-5) If you set STATE.json to REVIEW_READY, also add review_items with the file paths that should be reviewed.
-6) Update STATE.json to SPEC_READY, REVIEW_READY, or DONE depending on outcome.
+5) If STATE.json.interactive_mode is false, never set REVIEW_READY; proceed to DEV_READY or DONE.
+6) If interactive_mode is true, only set REVIEW_READY on milestones: when tasks_done % review_every_n_tasks == 0 or if the task explicitly requires review.
+7) If you set STATE.json to REVIEW_READY, also add review_items with the file paths that should be reviewed.
+8) If STATE.json.plan_locked is true, do not set SPEC_READY; use DEV_READY or DONE.
+9) Update STATE.json to SPEC_READY, REVIEW_READY, DEV_READY, or DONE depending on outcome.
 7) If verification fails, set STATE.json to ERROR with a short error message.
-8) Update notes/context_snapshot.md to summarize progress, key files, and next steps.
-9) Do not set STATE.json to RUNNING."
+10) Update notes/context_snapshot.md to summarize progress, key files, and next steps.
+11) Do not set STATE.json to RUNNING."

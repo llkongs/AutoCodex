@@ -68,7 +68,7 @@ def start_auto_run(project):
     state = read_json(state_path)
     if state.get("auto_run_pid"):
         return
-    cmd = ["bash", "-lc", "while true; do bash scripts/tick.sh; sleep 5; done"]
+    cmd = ["bash", "-lc", "while true; do bash scripts/tick.sh; sleep 20; done"]
     proc = subprocess.Popen(cmd, cwd=str(project), start_new_session=True)
     write_state(state_path, {"auto_run": True, "auto_run_pid": proc.pid})
 

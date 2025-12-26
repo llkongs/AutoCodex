@@ -396,6 +396,31 @@ PY
     append_event
     ;;
   SPEC_READY)
+    plan_locked="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(str(bool(json.loads(Path('STATE.json').read_text()).get('plan_locked', False))).lower())
+PY
+)"
+    if [ "$plan_locked" = "true" ]; then
+      python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'DEV_READY'
+data['role'] = None
+data['run_id'] = None
+data['started_at'] = None
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+      echo "[tick] plan_locked=true; skipping PO." | tee -a "$LOG_FILE"
+      exit 0
+    fi
     STATE_BEFORE="$state"
     ROLE_NAME="PO"
     export STATE_BEFORE ROLE_NAME LOG_FILE RUN_ID
