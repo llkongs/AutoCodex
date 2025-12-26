@@ -42,6 +42,67 @@ PY
   echo $!
 }
 
+update_heartbeat() {
+  python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['heartbeat_at'] = now
+data['updated_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+}
+
+wait_for_review() {
+  local approval_file="notes/review_approval.md"
+  python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'REVIEW_WAITING'
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+
+  while true; do
+    if [ -s "$approval_file" ]; then
+      python3 - <<'PY'
+import json, time
+from pathlib import Path
+
+path = Path('STATE.json')
+data = json.loads(path.read_text())
+now = int(time.time())
+data['state'] = 'DEV_READY'
+data['role'] = None
+data['run_id'] = None
+data['started_at'] = None
+data['updated_at'] = now
+data['heartbeat_at'] = now
+path.write_text(json.dumps(data, indent=2))
+PY
+      break
+    fi
+    state_now="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+    if [ "$state_now" != "REVIEW_WAITING" ]; then
+      break
+    fi
+    update_heartbeat
+    sleep 10
+  done
+}
 ACTION="$(python3 - <<'PY'
 import json, time
 from pathlib import Path
@@ -269,6 +330,15 @@ PY
       set -e
       kill "$hb_pid" 2>/dev/null || true
       append_event
+      next_state="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+      if [ "$next_state" = "REVIEW_READY" ]; then
+        wait_for_review
+      fi
     fi
     ;;
   DEV_READY)
@@ -311,6 +381,15 @@ from pathlib import Path
 print(json.loads(Path('STATE.json').read_text()).get('state',''))
 PY
 )"
+      if [ "$next_state" = "REVIEW_READY" ]; then
+        wait_for_review
+        next_state="$(python3 - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('STATE.json').read_text()).get('state',''))
+PY
+)"
+      fi
       if [ "$next_state" != "DEV_READY" ]; then
         break
       fi
@@ -369,7 +448,7 @@ PY
     kill "$hb_pid" 2>/dev/null || true
     append_event
     ;;
-  RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING)
+  RUNNING|REVIEW_READY|DONE|ERROR|PAUSED|INTAKE_WAITING|REVIEW_WAITING)
     echo "[tick] no action for state=$state" | tee -a "$LOG_FILE"
     ;;
   *)
