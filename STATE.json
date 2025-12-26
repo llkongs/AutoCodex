@@ -11,6 +11,8 @@
   "diagnosis_done": false,
   "resume_state": null,
   "interactive_mode": true,
+  "auto_run": false,
+  "auto_run_pid": null,
   "require_confirmations": true,
   "last_error": null,
   "diagnosis": null

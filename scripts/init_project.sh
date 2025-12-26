@@ -58,6 +58,8 @@ data["diagnosis_done"] = False
 data["resume_state"] = None
 data["diagnosis"] = None
 data["interactive_mode"] = True
+data["auto_run"] = False
+data["auto_run_pid"] = None
 data["require_confirmations"] = True
 path.write_text(json.dumps(data, indent=2))
 PY

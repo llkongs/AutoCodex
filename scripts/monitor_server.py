@@ -63,6 +63,28 @@ def write_state(path, updates):
     path.write_text(json.dumps(data, indent=2))
 
 
+def start_auto_run(project):
+    state_path = project / "STATE.json"
+    state = read_json(state_path)
+    if state.get("auto_run_pid"):
+        return
+    cmd = ["bash", "-lc", "while true; do bash scripts/tick.sh; sleep 5; done"]
+    proc = subprocess.Popen(cmd, cwd=str(project), start_new_session=True)
+    write_state(state_path, {"auto_run": True, "auto_run_pid": proc.pid})
+
+
+def stop_auto_run(project):
+    state_path = project / "STATE.json"
+    state = read_json(state_path)
+    pid = state.get("auto_run_pid")
+    if pid:
+        try:
+            os.killpg(pid, 15)
+        except Exception:
+            pass
+    write_state(state_path, {"auto_run": False, "auto_run_pid": None})
+
+
 def read_events(path, count):
     if not path.exists():
         return []
@@ -333,6 +355,10 @@ class Handler(BaseHTTPRequestHandler):
                                 }
                             )
                         write_state(state_path, updates)
+                        if interactive:
+                            stop_auto_run(project)
+                        else:
+                            start_auto_run(project)
                     self._json({"ok": True})
                     return
                 if len(parts) == 5 and parts[3] == "interaction" and parts[4] == "pause":
