@@ -1,0 +1,33 @@
+- id: T1
+  title: "Create single-file 2048 HTML demo"
+  status: done
+  priority: high
+  size: M
+  dod:
+    - "index.html renders a 4x4 grid and tiles"
+    - "keyboard and swipe controls move tiles"
+    - "score and best score persist via localStorage"
+  verify:
+    - "manual: open projects/demo-2048/index.html in a browser and play"
+
+- id: T2
+  title: "Add win/lose overlays and restart flow"
+  status: done
+  priority: medium
+  size: S
+  dod:
+    - "win overlay appears at 2048"
+    - "game over overlay appears when no moves left"
+    - "restart button resets the grid"
+  verify:
+    - "manual: play to win/lose or simulate by editing grid in console"
+
+- id: T3
+  title: "Document demo spec"
+  status: done
+  priority: low
+  size: XS
+  dod:
+    - "SPEC.md describes requirements and acceptance criteria"
+  verify:
+    - "manual: read SPEC.md"

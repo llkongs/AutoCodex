@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo 2048</title>
+    <style>
+      :root {
+        --bg: #0f0f14;
+        --panel: #171823;
+        --board: #1f2030;
+        --ink: #f5f6ff;
+        --muted: #a1a5c4;
+        --accent: #28f0ff;
+        --grid: #2a2c3d;
+        --gap: 12px;
+        --tile: #2c2f43;
+        --tile-2: #273a48;
+        --tile-4: #2c3d5e;
+        --tile-8: #3a355b;
+        --tile-16: #4a2e5e;
+        --tile-32: #5a2d58;
+        --tile-64: #6a2b4f;
+        --tile-128: #734063;
+        --tile-256: #7a4f70;
+        --tile-512: #7e5f7b;
+        --tile-1024: #7f6f87;
+        --tile-2048: #7f8092;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Rajdhani", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, rgba(40, 240, 255, 0.08), transparent 60%), var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .shell {
+        width: min(720px, 100%);
+        background: var(--panel);
+        border: 1px solid #2e3146;
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        background: #22263a;
+        border: 1px solid #2f3450;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        min-width: 110px;
+        text-align: center;
+      }
+
+      .badge span {
+        display: block;
+        color: var(--ink);
+        font-weight: 600;
+        margin-top: 4px;
+      }
+
+      .board {
+        background: var(--board);
+        border-radius: 16px;
+        padding: var(--gap);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--gap);
+        position: relative;
+        min-height: 360px;
+      }
+
+      .cell {
+        background: var(--grid);
+        border-radius: 12px;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--ink);
+        transition: transform 0.12s ease;
+      }
+
+      .cell.pop {
+        transform: scale(1.05);
+      }
+
+      .controls {
+        margin-top: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .btn {
+        background: var(--accent);
+        color: #0b0f12;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 1px;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(10, 12, 18, 0.82);
+        border-radius: 16px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+
+      .overlay.active {
+        display: flex;
+      }
+
+      .overlay h2 {
+        margin: 0;
+        font-size: 26px;
+      }
+
+      .overlay p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 640px) {
+        .board {
+          min-height: 300px;
+        }
+        .cell {
+          font-size: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div>
+          <h1>2048</h1>
+          <div class="hint">Merge tiles. Reach 2048. Use arrow keys or swipe.</div>
+        </div>
+        <div class="meta">
+          <div class="badge">Score<span id="score">0</span></div>
+          <div class="badge">Best<span id="best">0</span></div>
+        </div>
+      </header>
+
+      <div class="board" id="board">
+        <div class="overlay" id="overlay">
+          <h2 id="overlayTitle">Game Over</h2>
+          <p id="overlayText">Try again and beat your best score.</p>
+          <button class="btn" id="restartBtn">Restart</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="newGameBtn">New Game</button>
+        <div class="hint">Tip: Combine corner tiles for higher scores.</div>
+      </div>
+    </div>
+
+    <script>
+      const board = document.getElementById("board");
+      const scoreEl = document.getElementById("score");
+      const bestEl = document.getElementById("best");
+      const overlay = document.getElementById("overlay");
+      const overlayTitle = document.getElementById("overlayTitle");
+      const overlayText = document.getElementById("overlayText");
+      const newGameBtn = document.getElementById("newGameBtn");
+      const restartBtn = document.getElementById("restartBtn");
+
+      const size = 4;
+      let grid = [];
+      let score = 0;
+      let best = Number(localStorage.getItem("demo2048-best") || 0);
+      bestEl.textContent = best;
+
+      function tileColor(value) {
+        if (value >= 2048) return "var(--tile-2048)";
+        if (value >= 1024) return "var(--tile-1024)";
+        if (value >= 512) return "var(--tile-512)";
+        if (value >= 256) return "var(--tile-256)";
+        if (value >= 128) return "var(--tile-128)";
+        if (value >= 64) return "var(--tile-64)";
+        if (value >= 32) return "var(--tile-32)";
+        if (value >= 16) return "var(--tile-16)";
+        if (value >= 8) return "var(--tile-8)";
+        if (value >= 4) return "var(--tile-4)";
+        if (value >= 2) return "var(--tile-2)";
+        return "var(--tile)";
+      }
+
+      function init() {
+        grid = Array.from({ length: size }, () => Array(size).fill(0));
+        score = 0;
+        scoreEl.textContent = score;
+        overlay.classList.remove("active");
+        addRandomTile();
+        addRandomTile();
+        render();
+      }
+
+      function addRandomTile() {
+        const empty = [];
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (grid[r][c] === 0) empty.push([r, c]);
+          }
+        }
+        if (!empty.length) return false;
+        const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+        grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+        return true;
+      }
+
+      function render(popPositions = []) {
+        board.querySelectorAll(".cell").forEach((cell) => cell.remove());
+        grid.forEach((row, r) => {
+          row.forEach((value, c) => {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            if (value !== 0) {
+              cell.textContent = value;
+              cell.style.background = tileColor(value);
+            } else {
+              cell.textContent = "";
+            }
+            if (popPositions.some((pos) => pos[0] === r && pos[1] === c)) {
+              cell.classList.add("pop");
+            }
+            board.appendChild(cell);
+          });
+        });
+      }
+
+      function compress(row) {
+        const filtered = row.filter((v) => v !== 0);
+        while (filtered.length < size) filtered.push(0);
+        return filtered;
+      }
+
+      function merge(row) {
+        for (let i = 0; i < size - 1; i++) {
+          if (row[i] !== 0 && row[i] === row[i + 1]) {
+            row[i] *= 2;
+            row[i + 1] = 0;
+            score += row[i];
+          }
+        }
+        return row;
+      }
+
+      function moveLeft() {
+        let moved = false;
+        const pops = [];
+        for (let r = 0; r < size; r++) {
+          let row = grid[r];
+          const compressed = compress(row);
+          const merged = merge(compressed);
+          const finalRow = compress(merged);
+          if (finalRow.some((v, i) => v !== row[i])) moved = true;
+          finalRow.forEach((v, i) => {
+            if (v !== 0 && v !== row[i]) pops.push([r, i]);
+          });
+          grid[r] = finalRow;
+        }
+        if (moved) afterMove(pops);
+      }
+
+      function moveRight() {
+        rotateGrid(180);
+        moveLeft();
+        rotateGrid(180);
+      }
+
+      function moveUp() {
+        rotateGrid(270);
+        moveLeft();
+        rotateGrid(90);
+      }
+
+      function moveDown() {
+        rotateGrid(90);
+        moveLeft();
+        rotateGrid(270);
+      }
+
+      function rotateGrid(deg) {
+        const rotations = ((deg / 90) % 4 + 4) % 4;
+        for (let i = 0; i < rotations; i++) {
+          grid = grid[0].map((_, idx) => grid.map((row) => row[idx]).reverse());
+        }
+      }
+
+      function afterMove(pops) {
+        addRandomTile();
+        scoreEl.textContent = score;
+        if (score > best) {
+          best = score;
+          localStorage.setItem("demo2048-best", best);
+          bestEl.textContent = best;
+        }
+        render(pops);
+        if (checkWin()) {
+          overlayTitle.textContent = "You Win!";
+          overlayText.textContent = "Keep going or restart to chase a higher score.";
+          overlay.classList.add("active");
+        } else if (!movesAvailable()) {
+          overlayTitle.textContent = "Game Over";
+          overlayText.textContent = "No moves left. Try again.";
+          overlay.classList.add("active");
+        }
+      }
+
+      function movesAvailable() {
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const value = grid[r][c];
+            if (value === 0) return true;
+            const right = c < size - 1 ? grid[r][c + 1] : null;
+            const down = r < size - 1 ? grid[r + 1][c] : null;
+            if (value === right || value === down) return true;
+          }
+        }
+        return false;
+      }
+
+      function checkWin() {
+        return grid.some((row) => row.some((value) => value >= 2048));
+      }
+
+      function handleKey(e) {
+        if (overlay.classList.contains("active")) return;
+        switch (e.key) {
+          case "ArrowLeft":
+            moveLeft();
+            break;
+          case "ArrowRight":
+            moveRight();
+            break;
+          case "ArrowUp":
+            moveUp();
+            break;
+          case "ArrowDown":
+            moveDown();
+            break;
+          default:
+            return;
+        }
+        e.preventDefault();
+      }
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      function handleTouchStart(e) {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+      }
+
+      function handleTouchEnd(e) {
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+        const threshold = 24;
+        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          dx > 0 ? moveRight() : moveLeft();
+        } else {
+          dy > 0 ? moveDown() : moveUp();
+        }
+      }
+
+      newGameBtn.addEventListener("click", init);
+      restartBtn.addEventListener("click", init);
+      window.addEventListener("keydown", handleKey);
+      board.addEventListener("touchstart", handleTouchStart, { passive: true });
+      board.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+      init();
+    </script>
+  </body>
+</html>

@@ -2,13 +2,13 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$BASE_DIR"
+PROJECT_DIR=""
 
 LANG_CODE="${STATUS_LANG:-en}"
 TAIL_LINES="${STATUS_TAIL:-50}"
 
 usage() {
-  echo "Usage: bash scripts/status.sh [--lang en|zh] [--tail N]"
+  echo "Usage: bash scripts/status.sh [--lang en|zh] [--tail N] [--project path]"
 }
 
 while [ $# -gt 0 ]; do
@@ -19,6 +19,10 @@ while [ $# -gt 0 ]; do
       ;;
     --tail)
       TAIL_LINES="${2:-50}"
+      shift 2
+      ;;
+    --project)
+      PROJECT_DIR="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -32,6 +36,26 @@ while [ $# -gt 0 ]; do
       ;;
   esac
 done
+
+if [ -n "$PROJECT_DIR" ]; then
+  if [ "$PROJECT_DIR" != /* ]; then
+    PROJECT_DIR="$BASE_DIR/$PROJECT_DIR"
+  fi
+  if [ ! -d "$PROJECT_DIR" ]; then
+    echo "Project path not found: $PROJECT_DIR"
+    exit 1
+  fi
+  cd "$PROJECT_DIR"
+else
+  if [ -f "$BASE_DIR/TEMPLATE_ROOT" ] && [ "$(pwd)" = "$BASE_DIR" ]; then
+    echo "STATE.json not found; use --project."
+    exit 1
+  fi
+  if [ ! -f "STATE.json" ]; then
+    echo "STATE.json not found; use --project."
+    exit 1
+  fi
+fi
 
 label() {
   local key="$1"

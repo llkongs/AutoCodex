@@ -68,8 +68,13 @@ def start_auto_run(project):
     state = read_json(state_path)
     if state.get("auto_run_pid"):
         return
-    cmd = ["bash", "-lc", "while true; do bash scripts/tick.sh; sleep 20; done"]
-    proc = subprocess.Popen(cmd, cwd=str(project), start_new_session=True)
+    tick_path = BASE_DIR / "scripts" / "tick.sh"
+    cmd = [
+        "bash",
+        "-lc",
+        f"while true; do bash '{tick_path}' --project '{project}'; sleep 20; done",
+    ]
+    proc = subprocess.Popen(cmd, cwd=str(BASE_DIR), start_new_session=True)
     write_state(state_path, {"auto_run": True, "auto_run_pid": proc.pid})
 
 
@@ -418,9 +423,10 @@ class Handler(BaseHTTPRequestHandler):
                     self._json({"ok": True})
                     return
                 if len(parts) == 4 and parts[3] == "run":
+                    tick_path = BASE_DIR / "scripts" / "tick.sh"
                     subprocess.Popen(
-                        ["bash", "scripts/tick.sh"],
-                        cwd=str(project),
+                        ["bash", str(tick_path), "--project", str(project)],
+                        cwd=str(BASE_DIR),
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
                     )

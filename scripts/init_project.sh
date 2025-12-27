@@ -39,8 +39,7 @@ mkdir -p "$target"
 for file in AGENTS.md DIAGNOSE_AGENT.md SPEC.md TASKS.yaml STATE.json README.md ROLES.md START_HERE.md; do
   cp "$BASE_DIR/$file" "$target/"
 done
-cp -R "$BASE_DIR/scripts" "$target/"
-mkdir -p "$target/logs"
+mkdir -p "$target/logs" "$target/notes" "$target/drafts" "$target/chapters"
 
 python3 - <<PY
 import json

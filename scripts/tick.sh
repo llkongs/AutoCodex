@@ -2,14 +2,35 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$BASE_DIR"
+PROJECT_DIR=""
+if [ "${1:-}" = "--project" ]; then
+  PROJECT_DIR="${2:-}"
+  if [ -z "$PROJECT_DIR" ]; then
+    echo "[tick] --project requires a path."
+    exit 1
+  fi
+  if [ "$PROJECT_DIR" != /* ]; then
+    PROJECT_DIR="$BASE_DIR/$PROJECT_DIR"
+  fi
+  if [ ! -d "$PROJECT_DIR" ]; then
+    echo "[tick] project path not found: $PROJECT_DIR"
+    exit 1
+  fi
+  cd "$PROJECT_DIR"
+else
+  if [ -f "$BASE_DIR/TEMPLATE_ROOT" ] && [ "$(pwd)" = "$BASE_DIR" ]; then
+    echo "[tick] template root marker detected; use --project."
+    exit 0
+  fi
+fi
 
-if [ -f "$BASE_DIR/TEMPLATE_ROOT" ]; then
+PROJECT_DIR="$(pwd)"
+if [ -f "$PROJECT_DIR/TEMPLATE_ROOT" ]; then
   echo "[tick] template root marker detected; refusing to run."
   exit 0
 fi
 
-BASE_NAME="$(basename "$BASE_DIR")"
+BASE_NAME="$(basename "$PROJECT_DIR")"
 if echo "$BASE_NAME" | grep -qi "template"; then
   echo "[tick] template directory detected ($BASE_NAME); refusing to run."
   exit 0
@@ -17,7 +38,7 @@ fi
 
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
 export RUN_ID
-LOG_DIR="$BASE_DIR/logs"
+LOG_DIR="$PROJECT_DIR/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/tick-$RUN_ID.log"
 
@@ -385,7 +406,7 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/intake_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    bash "$BASE_DIR/scripts/intake_step.sh" --project "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE" &
     run_pid=$!
     hb_pid=$(start_heartbeat "$run_pid")
     wait "$run_pid"
@@ -441,7 +462,7 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/po_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    bash "$BASE_DIR/scripts/po_step.sh" --project "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE" &
     run_pid=$!
     hb_pid=$(start_heartbeat "$run_pid")
     wait "$run_pid"
@@ -482,7 +503,7 @@ data['last_error'] = None
 path.write_text(json.dumps(data, indent=2))
 PY
       set +e
-      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE" &
+      bash "$BASE_DIR/scripts/dev_step.sh" --project "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE" &
       run_pid=$!
       hb_pid=$(start_heartbeat "$run_pid")
       wait "$run_pid"
@@ -531,7 +552,7 @@ PY
     chain_count=0
     while true; do
       set +e
-      bash scripts/dev_step.sh 2>&1 | tee -a "$LOG_FILE" &
+      bash "$BASE_DIR/scripts/dev_step.sh" --project "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE" &
       run_pid=$!
       hb_pid=$(start_heartbeat "$run_pid")
       wait "$run_pid"
@@ -603,7 +624,7 @@ data['heartbeat_at'] = now
 path.write_text(json.dumps(data, indent=2))
 PY
     set +e
-    bash scripts/diagnose_step.sh 2>&1 | tee -a "$LOG_FILE" &
+    bash "$BASE_DIR/scripts/diagnose_step.sh" --project "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE" &
     run_pid=$!
     hb_pid=$(start_heartbeat "$run_pid")
     wait "$run_pid"

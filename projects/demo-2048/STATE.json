@@ -1,0 +1,21 @@
+{
+  "state": "DONE",
+  "next": "DEV",
+  "lock": null,
+  "run_id": null,
+  "role": null,
+  "started_at": null,
+  "updated_at": null,
+  "heartbeat_at": null,
+  "timeout_sec": 1800,
+  "diagnosis_done": false,
+  "resume_state": null,
+  "interactive_mode": true,
+  "auto_run": false,
+  "auto_run_pid": null,
+  "plan_locked": true,
+  "review_every_n_tasks": 5,
+  "require_confirmations": true,
+  "last_error": null,
+  "diagnosis": null
+}

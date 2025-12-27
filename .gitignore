@@ -3,3 +3,5 @@ logs/
 .agent_lock
 projects/*
 !projects/.gitkeep
+!projects/demo-2048/
+!projects/demo-2048/**
