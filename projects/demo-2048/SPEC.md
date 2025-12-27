@@ -15,7 +15,7 @@ Deliver a single-file HTML 2048 game demo that runs locally without any build to
 - R5: Keep all assets inline (no external dependencies).
 
 ## Acceptance Criteria
-- AC1: Opening `projects/demo-2048/index.html` in a browser starts the game.
+- AC1: Opening `projects/demo-2048/demo-2048.html` in a browser starts the game.
 - AC2: Arrow keys and swipe moves tiles.
 - AC3: Score updates on merges and best score persists between reloads.
 - AC4: Game over and win overlays appear appropriately.

@@ -1,3 +1,9 @@
+Demo 2048 Result
+
+This project is complete. Open `demo-2048.html` in this folder to view and play the game.
+
+---
+
 AI Auto Task Frame
 
 This folder is a reusable protocol + runner scripts for Codex CLI automation.

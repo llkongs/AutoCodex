@@ -8,7 +8,7 @@
     - "keyboard and swipe controls move tiles"
     - "score and best score persist via localStorage"
   verify:
-    - "manual: open projects/demo-2048/index.html in a browser and play"
+    - "manual: open projects/demo-2048/demo-2048.html in a browser and play"
 
 - id: T2
   title: "Add win/lose overlays and restart flow"
