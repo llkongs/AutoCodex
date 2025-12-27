@@ -276,6 +276,44 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        if path == "/api/projects/create":
+            name = (payload.get("name") or "").strip()
+            description = (payload.get("description") or "").strip()
+            if not name:
+                self._json({"error": "name required"}, status=400)
+                return
+            if not re.match(r"^[a-zA-Z0-9][a-zA-Z0-9-_]+$", name):
+                self._json({"error": "invalid name"}, status=400)
+                return
+            init_script = BASE_DIR / "scripts" / "init_project.sh"
+            try:
+                created = subprocess.check_output(
+                    ["bash", str(init_script), name],
+                    cwd=str(BASE_DIR),
+                    text=True,
+                ).strip()
+            except subprocess.CalledProcessError as exc:
+                self._json({"error": "init failed", "detail": str(exc)}, status=500)
+                return
+            project_path = Path(created)
+            if not project_path.exists():
+                self._json({"error": "project not created"}, status=500)
+                return
+            if description:
+                answers = project_path / "INTAKE_ANSWERS.md"
+                answers.write_text(
+                    "# Intake Answers\n\n## Initial Description\n\n" + description + "\n"
+                )
+            tick_path = BASE_DIR / "scripts" / "tick.sh"
+            subprocess.Popen(
+                ["bash", str(tick_path), "--project", str(project_path)],
+                cwd=str(BASE_DIR),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            self._json({"ok": True, "project": project_path.name})
+            return
+
         if path.startswith("/api/projects"):
             parts = path.strip("/").split("/")
             if len(parts) >= 3:

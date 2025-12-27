@@ -1,33 +1,128 @@
-- id: T1
-  title: "Create single-file 2048 HTML demo"
-  status: done
-  priority: high
-  size: M
-  dod:
-    - "index.html renders a 4x4 grid and tiles"
-    - "keyboard and swipe controls move tiles"
-    - "score and best score persist via localStorage"
-  verify:
-    - "manual: open projects/demo-2048/demo-2048.html in a browser and play"
+version: 1
+project: "AI Auto Task Frame"
 
-- id: T2
-  title: "Add win/lose overlays and restart flow"
-  status: done
-  priority: medium
-  size: S
-  dod:
-    - "win overlay appears at 2048"
-    - "game over overlay appears when no moves left"
-    - "restart button resets the grid"
-  verify:
-    - "manual: play to win/lose or simulate by editing grid in console"
+tasks:
+  - id: T1
+    title: "Implement init script for project creation"
+    status: done  # todo | in_progress | done | blocked
+    priority: high
+    size: M  # S | M | L
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/init_project.sh creates projects/ if needed"
+      - "Name generation, collision handling, and template-name checks work"
+      - "Required framework files and scripts/ are copied into the new project"
+      - "logs/ is created in the new project"
+    verify:
+      - "manual: run `bash scripts/init_project.sh` and check output"
 
-- id: T3
-  title: "Document demo spec"
-  status: done
-  priority: low
-  size: XS
-  dod:
-    - "SPEC.md describes requirements and acceptance criteria"
-  verify:
-    - "manual: read SPEC.md"
+  - id: T2
+    title: "Document the init workflow in README"
+    status: done
+    priority: high
+    size: S
+    max_duration_min: 20
+    blocked_by: ["T1"]
+    dod:
+      - "README describes how to create a new project folder and run tick.sh"
+    verify:
+      - "manual"
+
+  - id: T3
+    title: "Add repo-root guidance and projects/ placeholder"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 15
+    blocked_by: []
+    dod:
+      - "AGENTS.md mentions initializing a project under projects/"
+      - "projects/ exists with a placeholder file"
+    verify:
+      - "manual"
+
+  - id: T4
+    title: "Add roles template and init integration"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "ROLES.md exists with a clear template"
+      - "init_project.sh copies ROLES.md and START_HERE.md into projects"
+      - "Docs mention defining roles first"
+    verify:
+      - "manual"
+
+  - id: T5
+    title: "Add intake stage to collect requirements and roles"
+    status: done
+    priority: high
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/intake_step.sh exists and prompts for requirements"
+      - "tick.sh handles INTAKE_READY and routes to intake_step.sh"
+      - "STATE.json defaults to INTAKE_READY in the template"
+      - "Docs mention the intake step"
+    verify:
+      - "manual: run `bash scripts/tick.sh` from a new project and answer prompts"
+
+  - id: T6
+    title: "Add CLI status panel"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "scripts/status.sh shows state, role, runtime, heartbeat, task progress, and log tail"
+      - "Supports --tail and --lang options"
+      - "README documents status usage"
+    verify:
+      - "manual: run `bash scripts/status.sh --tail 50`"
+
+  - id: T7
+    title: "Add local web dashboard"
+    status: done
+    priority: medium
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "scripts/monitor_server.py serves project state/tasks/logs APIs"
+      - "dashboard/index.html renders state, tasks, and logs"
+      - "README documents how to start the dashboard"
+    verify:
+      - "manual: run `python3 scripts/monitor_server.py` and open browser"
+
+  - id: T8
+    title: "Add events log for monitoring metrics"
+    status: done
+    priority: medium
+    size: S
+    max_duration_min: 20
+    blocked_by: []
+    dod:
+      - "logs/events.ndjson is appended on each tick run"
+      - "Event includes role, state_before, state_after, and exit_code"
+      - "Dashboard displays recent events and success rate"
+    verify:
+      - "manual: run `bash scripts/tick.sh` and inspect logs/events.ndjson"
+
+  - id: T9
+    title: "Add intake waiting and pause controls in UI"
+    status: done
+    priority: medium
+    size: M
+    max_duration_min: 45
+    blocked_by: []
+    dod:
+      - "INTAKE_QUESTIONS.md and INTAKE_ANSWERS.md are used in intake flow"
+      - "Dashboard shows intake questions and accepts answers"
+      - "Dashboard can pause/resume projects"
+    verify:
+      - "manual: answer intake via UI and resume"

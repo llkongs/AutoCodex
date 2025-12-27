@@ -405,6 +405,64 @@
         border: 1px solid var(--border);
       }
 
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(6, 6, 12, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-card {
+        width: min(520px, 92vw);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-card h3 {
+        margin: 0 0 12px;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+
+      .modal-card label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .modal-card input,
+      .modal-card textarea {
+        width: 100%;
+        background: #0f0a1f;
+        color: var(--ink);
+        border: 1px solid rgba(58, 31, 111, 0.9);
+        border-radius: 10px;
+        padding: 10px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 12px;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
       .tabs {
         display: flex;
         gap: 10px;
@@ -527,6 +585,7 @@
             <option value="en">English</option>
           </select>
         </label>
+        <button class="btn alt" id="newProjectBtn" data-i18n="newProject">New Project</button>
         <span id="lastUpdated">Last update: --</span>
         <label class="toggle">
           <input type="checkbox" id="followLogs" checked />
@@ -640,6 +699,20 @@
       </main>
     </div>
 
+    <div class="modal" id="newProjectModal">
+      <div class="modal-card">
+        <h3 data-i18n="newProjectTitle">Create New Project</h3>
+        <label for="newProjectName" data-i18n="projectNameLabel">Project name</label>
+        <input id="newProjectName" type="text" placeholder="demo-2048" data-i18n-placeholder="projectNamePlaceholder" />
+        <label for="newProjectDesc" data-i18n="projectDescLabel">Project description</label>
+        <textarea id="newProjectDesc" rows="6" placeholder="Describe what you want to build..." data-i18n-placeholder="projectDescPlaceholder"></textarea>
+        <div class="modal-actions">
+          <button class="btn alt" id="cancelCreateBtn" data-i18n="cancel">Cancel</button>
+          <button class="btn" id="createProjectBtn" data-i18n="create">Create</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const projectListEl = document.getElementById("projectList");
       const stateValue = document.getElementById("stateValue");
@@ -674,6 +747,12 @@
       const tabs = document.querySelectorAll(".tab");
       const tabPanels = document.querySelectorAll(".tab-panel");
       const languageSelect = document.getElementById("languageSelect");
+      const newProjectBtn = document.getElementById("newProjectBtn");
+      const newProjectModal = document.getElementById("newProjectModal");
+      const newProjectName = document.getElementById("newProjectName");
+      const newProjectDesc = document.getElementById("newProjectDesc");
+      const createProjectBtn = document.getElementById("createProjectBtn");
+      const cancelCreateBtn = document.getElementById("cancelCreateBtn");
 
       let currentProject = null;
       let timer = null;
@@ -729,6 +808,15 @@
           statusDone: "完成",
           statusBlocked: "阻塞",
           statusFailed: "失败",
+          newProject: "新建项目",
+          newProjectTitle: "创建新项目",
+          projectNameLabel: "项目名称",
+          projectDescLabel: "项目描述",
+          projectNamePlaceholder: "demo-2048",
+          projectDescPlaceholder: "简单描述你要做什么...",
+          cancel: "取消",
+          create: "创建",
+          nameRequired: "请输入项目名称。",
         },
         en: {
           title: "AutoCodex Monitor",
@@ -776,6 +864,15 @@
           statusDone: "Done",
           statusBlocked: "Blocked",
           statusFailed: "Failed",
+          newProject: "New Project",
+          newProjectTitle: "Create New Project",
+          projectNameLabel: "Project name",
+          projectDescLabel: "Project description",
+          projectNamePlaceholder: "demo-2048",
+          projectDescPlaceholder: "Describe what you want to build...",
+          cancel: "Cancel",
+          create: "Create",
+          nameRequired: "Please enter a project name.",
         },
       };
 
@@ -1105,6 +1202,37 @@
       });
 
       refreshBtn.addEventListener("click", refreshAll);
+      newProjectBtn.addEventListener("click", () => {
+        newProjectName.value = "";
+        newProjectDesc.value = "";
+        newProjectModal.classList.add("active");
+        newProjectName.focus();
+      });
+      cancelCreateBtn.addEventListener("click", () => {
+        newProjectModal.classList.remove("active");
+      });
+      newProjectModal.addEventListener("click", (e) => {
+        if (e.target === newProjectModal) {
+          newProjectModal.classList.remove("active");
+        }
+      });
+      createProjectBtn.addEventListener("click", async () => {
+        const name = (newProjectName.value || "").trim();
+        const description = (newProjectDesc.value || "").trim();
+        if (!name) {
+          alert(t("nameRequired"));
+          return;
+        }
+        try {
+          const res = await postJSON("/api/projects/create", { name, description });
+          newProjectModal.classList.remove("active");
+          currentProject = res.project || name;
+          await refreshAll(true);
+          await loadProjects();
+        } catch (err) {
+          alert(err.message || "Create failed");
+        }
+      });
       languageSelect.addEventListener("change", () => {
         const lang = languageSelect.value || "zh";
         localStorage.setItem("dashboardLang", lang);
